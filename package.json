@@ -7,7 +7,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "seed": "ts-node src/scripts/seedDictionary.ts"
+    "seed": "ts-node src/scripts/seedDictionary.ts",
+    "seed:bulk": "ts-node src/scripts/bulkSeed.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
