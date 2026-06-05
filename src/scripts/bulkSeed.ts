@@ -10,7 +10,8 @@ const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 
-// 250 words per level = 1000 total
+const DELAY_MS = 4500; // 4.5 seconds between requests = ~13 RPM (safely under 15 RPM limit)
+
 const WORD_LISTS: Record<DifficultyLevel, string[]> = {
   beginner: [
     'able','accept','act','add','afraid','after','again','age','ago','agree',
@@ -36,17 +37,7 @@ const WORD_LISTS: Record<DifficultyLevel, string[]> = {
     'low','make','man','many','mark','matter','mean','meet','mind','miss',
     'mix','money','month','more','move','much','need','never','next','nice',
     'night','north','note','now','number','offer','often','once','open','order',
-    'other','our','out','over','own','pain','pass','pay','people','pick',
-    'place','plan','play','point','poor','pull','push','put','read','ready',
-    'real','reason','red','remember','rest','right','rise','road','rock','run',
-    'safe','same','save','say','school','see','seem','sell','send','set',
-    'share','show','sign','simple','sing','sit','sleep','small','smile','south',
-    'speak','spend','stand','start','stay','stop','store','strong','study','sun',
-    'sure','swim','take','talk','teach','tell','thank','think','throw','time',
-    'tired','together','too','top','touch','travel','true','try','turn','understand',
-    'use','very','wait','walk','want','warm','watch','water','wear','week',
-    'well','west','wide','wind','wish','with','wonder','word','work','world',
-    'worry','write','wrong','year','yet','young','your','zero','zone','zoom'
+    'other','out','over','own','pain','pass','pay','people','pick','place'
   ],
   intermediate: [
     'abandon','abstract','achieve','acknowledge','acquire','adapt','adequate','adjacent','adjust','admire',
@@ -72,7 +63,8 @@ const WORD_LISTS: Record<DifficultyLevel, string[]> = {
     'review','revise','significant','similar','situation','solution','specify','stable','strategy','strengthen',
     'structure','submit','succeed','suggest','summarize','support','sustain','target','technique','temporary',
     'tendency','theory','transform','transition','transmit','trend','unique','update','utilize','validate',
-    'vary','version','virtual','visible','voluntary','vulnerable','widespread','withdraw','witness','achieve'
+    'vary','version','virtual','visible','voluntary','vulnerable','widespread','withdraw','witness','worthwhile',
+    'abstract','accelerate','accumulate','accurate','acknowledge','activate','acute','adamant','adhere','adjacent'
   ],
   advanced: [
     'aberrant','abstruse','acrimony','acumen','adumbrate','aesthetic','affectation','aggrandize','alacrity','alienate',
@@ -94,52 +86,57 @@ const WORD_LISTS: Record<DifficultyLevel, string[]> = {
     'prodigious','profound','prolific','provocative','prudent','radiant','rationalize','reticent','rhetoric','rigorous',
     'sarcastic','scrutinize','serendipity','shrewd','skeptical','sophisticated','speculation','stoic','subjective','subtle',
     'superficial','surplus','sustainable','sympathetic','tangible','tenacious','theoretical','trivial','turbulent','ubiquitous',
-    'undermine','unequivocal','unprecedented','vague','venerate','verbose','versatile','vindicate','volatile','zealous'
+    'undermine','unequivocal','unprecedented','vague','venerate','verbose','versatile','vindicate','volatile','zealous',
+    'admonish','adversarial','affinity','aloof','altercation','amicable','anachronistic','apocryphal','arbitrary','ardor',
+    'ascetic','assiduous','bellicose','benefactor','blithe','boorish','bravado','bucolic','burgeon','capricious',
+    'censure','chagrin','chicanery','clairvoyant','clemency','cognition','combustible','commensurate','compunction','conciliatory',
+    'condone','congenial','contentious','contrite','culpable','dauntless','debonair','decorum','deferential','deft'
   ],
   expert: [
-    'abeyance','abnegate','abscond','abstemious','accretion','acerbic','acrimony','adamantine','adumbrate','aegis',
-    'afflatus','aggrandizement','agonistic','aleatoric','aleatory','alieniloquy','allopath','amanuensis','ameliorate','analeptic',
-    'anamnesis','anfractuous','animadversion','antinomy','apocryphal','apodictic','apogee','apophenia','apotheosis','apriorism',
-    'apposite','arabesque','arcane','arrogate','asperity','atavism','atrabilious','autodidact','axiological','bathetic',
-    'brachylogy','cachinnate','calumny','casuistry','catachresis','chicanery','chimerical','clerisy','cognoscenti','compunction',
-    'concomitant','consanguinity','contumacious','cosmogony','cupidity','defalcation','defenestration','demiurge','denigrate','denouement',
-    'deracinate','desideratum','diatribe','didactic','dilettante','discomfit','discursive','disingenuous','dissimulate','dogmatic',
-    'ebullient','effrontery','egregious','elegy','elision','emollient','empiricism','encomium','endemic','enervate',
-    'ennui','ephebe','episteme','equanimity','equivocate','erudite','eschatology','etiolate','etymology','eudaimonia',
-    'eulogize','euphony','excoriate','execrate','exegesis','exiguous','expatiate','expiate','expunge','extirpate',
-    'fatuous','felicitous','filibuster','flagitious','fulminate','garrulous','genuflect','grandiloquent','hagiography','harbinger',
-    'hermeneutics','heterodox','heuristic','hubris','hypostasis','iconoclast','idiosyncrasy','ignominious','immutable','impecunious',
-    'imperious','impugn','inchoate','ineluctable','inexorable','inimical','iniquitous','insouciance','interpolate','interregnum',
-    'inveterate','irascible','jejune','juxtapose','lachrymose','lassitude','legerdemain','limerence','loquacious','lugubrious',
-    'machiavellian','magnanimous','malapropism','malodorous','melancholia','mendacious','mercurial','metaphysical','meretricious','misanthrope',
-    'mnemonic','moribund','munificent','narcissism','neologism','nihilism','numinous','obdurate','obfuscate','obloquy',
-    'obstreperous','obsequious','obtuse','occlude','oligarchy','ontology','opprobrium','ostracize','palimpsest','panacea',
-    'panegyric','paradigm','pariah','parlance','parsimonious','peccadillo','perfidious','peripatetic','peroration','perspicacious',
-    'pertinacious','petulant','phantasmagoria','philistine','plenipotentiary','polemic','positivism','postulate','pragmatism','predilection',
-    'probity','proclivity','prolix','propitious','proscribe','pulchritude','punctilious','pusilanimous','quixotic','recalcitrant',
+    'abeyance','abnegate','abscond','abstemious','accretion','acerbic','adamantine','adumbrate','aegis','afflatus',
+    'aggrandizement','agonistic','aleatoric','amanuensis','ameliorate','analeptic','anamnesis','anfractuous','animadversion','antinomy',
+    'apocryphal','apodictic','apogee','apophenia','apotheosis','apriorism','apposite','arabesque','arrogate','asperity',
+    'atavism','atrabilious','autodidact','axiological','bathetic','brachylogy','cachinnate','calumny','casuistry','catachresis',
+    'chicanery','chimerical','clerisy','cognoscenti','compunction','concomitant','consanguinity','contumacious','cosmogony','cupidity',
+    'defalcation','defenestration','demiurge','denigrate','denouement','deracinate','desideratum','diatribe','didactic','dilettante',
+    'discomfit','discursive','disingenuous','dissimulate','dogmatic','ebullient','effrontery','egregious','elegy','elision',
+    'emollient','empiricism','encomium','endemic','enervate','ennui','episteme','equanimity','equivocate','erudite',
+    'eschatology','etiolate','etymology','eudaimonia','eulogize','euphony','excoriate','execrate','exegesis','exiguous',
+    'expatiate','expiate','expunge','extirpate','fatuous','felicitous','filibuster','flagitious','fulminate','garrulous',
+    'genuflect','grandiloquent','hagiography','harbinger','hermeneutics','heterodox','heuristic','hubris','hypostasis','iconoclast',
+    'idiosyncrasy','ignominious','immutable','impecunious','imperious','impugn','inchoate','ineluctable','inexorable','inimical',
+    'iniquitous','insouciance','interpolate','interregnum','inveterate','irascible','jejune','juxtapose','lachrymose','lassitude',
+    'legerdemain','limerence','loquacious','lugubrious','machiavellian','magnanimous','malapropism','melancholia','mendacious','mercurial',
+    'metaphysical','meretricious','misanthrope','mnemonic','moribund','munificent','narcissism','neologism','nihilism','numinous',
+    'obdurate','obfuscate','obloquy','obstreperous','obsequious','occlude','oligarchy','ontology','opprobrium','ostracize',
+    'palimpsest','panacea','panegyric','paradigm','pariah','parlance','parsimonious','peccadillo','perfidious','peripatetic',
+    'peroration','perspicacious','pertinacious','petulant','phantasmagoria','philistine','polemic','positivism','postulate','pragmatism',
+    'predilection','probity','proclivity','prolix','propitious','proscribe','pulchritude','punctilious','quixotic','recalcitrant',
     'recidivism','reification','remonstrate','reprobate','requite','ruminate','sagacious','salutary','sanctimonious','sardonic',
-    'saturnine','schadenfreude','scintilla','semiotic','senescence','sesquipedalian','sibilant','sinecure','sobriety','solecism',
-    'solipsism','somnolent','sophistry','soporific','stertorous','stigmatize','stolid','stygian','subjugate','sycophant',
-    'synecdoche','taciturn','tautology','tendentious','tergiversate','timorous','toady','torpid','tortuous','transmogrify',
-    'trenchant','trepidation','truculent','tumultuous','turpitude','ululate','unctuous','undulate','usurp','uxorious',
-    'vacuous','venal','venial','verisimilitude','vexillology','vicarious','vitiate','vituperate','voluble','weltanschauung'
+    'saturnine','schadenfreude','scintilla','semiotic','senescence','sesquipedalian','sibilant','sinecure','solecism','solipsism',
+    'somnolent','sophistry','soporific','stigmatize','stolid','subjugate','sycophant','synecdoche','taciturn','tautology',
+    'tendentious','tergiversate','timorous','torpid','tortuous','transmogrify','trenchant','trepidation','truculent','turpitude',
+    'ululate','unctuous','undulate','usurp','vacuous','venal','venial','verisimilitude','vitiate','vituperate',
+    'voluble','weltanschauung','xenophobia','zeitgeist','zealotry','acedia','afflatus','agnosticism','algolagnia','alieniloquy'
   ]
 };
 
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function generateWordData(word: string, level: DifficultyLevel): Promise<any> {
-  const prompt = `
-Analyze the English word "${word}" and return a JSON object:
+  const prompt = `Analyze the English word "${word}" and return ONLY this JSON object with no markdown:
 {
   "word": "${word}",
   "meaning": "clear definition in 1-2 sentences",
-  "sentence": "one natural example sentence",
+  "sentence": "one natural example sentence using the word",
   "level": "${level}",
   "synonyms": ["2-3 synonyms"],
-  "antonyms": ["2-3 antonyms"],
+  "antonyms": ["1-2 antonyms"],
   "etymology": "brief origin in 1 sentence",
-  "partOfSpeech": "noun|verb|adjective|adverb|etc"
-}
-Return ONLY the JSON. No markdown, no backticks.`;
+  "partOfSpeech": "noun or verb or adjective or adverb"
+}`;
 
   const result = await model.generateContent(prompt);
   const text = result.response.text().trim().replace(/```json|```/g, '').trim();
@@ -148,16 +145,20 @@ Return ONLY the JSON. No markdown, no backticks.`;
 
 async function bulkSeed() {
   await connectMongoDB();
-  console.log('\n🌱 Starting bulk seed — 1000 words across 4 difficulty levels...\n');
 
   const levels: DifficultyLevel[] = ['beginner', 'intermediate', 'advanced', 'expert'];
   let totalInserted = 0;
   let totalSkipped = 0;
   let totalFailed = 0;
+  const failedWords: string[] = [];
+
+  console.log('\n🌱 Wordly V2 — Bulk Seed (1000 words)');
+  console.log('⏱️  Rate limit: 1 word every 4.5s (~13 RPM, safely under Gemini free limit)');
+  console.log('⏳ Estimated time: ~75 minutes\n');
 
   for (const level of levels) {
     const words = WORD_LISTS[level];
-    console.log(`\n📚 Processing ${words.length} ${level.toUpperCase()} words...`);
+    console.log(`\n📚 [${level.toUpperCase()}] Starting ${words.length} words...`);
 
     let levelInserted = 0;
     let levelSkipped = 0;
@@ -165,9 +166,9 @@ async function bulkSeed() {
 
     for (let i = 0; i < words.length; i++) {
       const word = words[i].toLowerCase().trim();
+      const progress = `[${i + 1}/${words.length}]`;
 
       try {
-        // Check if already exists
         const exists = await Word.findOne({ word });
         if (exists) {
           levelSkipped++;
@@ -179,12 +180,12 @@ async function bulkSeed() {
         const data = await generateWordData(word, level);
 
         await Word.create({
-          word: data.word || word,
+          word: data.word?.toLowerCase() || word,
           meaning: data.meaning || '',
           sentence: data.sentence || '',
           level,
-          synonyms: data.synonyms || [],
-          antonyms: data.antonyms || [],
+          synonyms: Array.isArray(data.synonyms) ? data.synonyms : [],
+          antonyms: Array.isArray(data.antonyms) ? data.antonyms : [],
           etymology: data.etymology || '',
           partOfSpeech: data.partOfSpeech || 'unknown',
           addedVia: 'manual',
@@ -194,53 +195,57 @@ async function bulkSeed() {
         totalInserted++;
         process.stdout.write(`✅`);
 
-        // Progress update every 25 words
-        if ((i + 1) % 25 === 0) {
-          console.log(`\n   [${level}] ${i + 1}/${words.length} done — inserted: ${levelInserted}, skipped: ${levelSkipped}, failed: ${levelFailed}`);
+        // Print detailed progress every 10 words
+        if ((i + 1) % 10 === 0) {
+          const totalDone = totalInserted + totalSkipped + totalFailed;
+          const elapsed = Math.round((totalDone * DELAY_MS) / 60000);
+          console.log(`\n   ${progress} inserted:${levelInserted} skipped:${levelSkipped} failed:${levelFailed} | ~${elapsed} min elapsed`);
         }
 
-        // Small delay to avoid rate limiting
-        await new Promise(r => setTimeout(r, 300));
+        // Rate limit delay — 4.5 seconds between each word
+        await delay(DELAY_MS);
 
       } catch (error: any) {
         levelFailed++;
         totalFailed++;
+        failedWords.push(`${word} (${level})`);
         process.stdout.write(`❌`);
-        // Continue on failure
-        await new Promise(r => setTimeout(r, 500));
+        await delay(DELAY_MS);
       }
     }
 
-    console.log(`\n✅ ${level.toUpperCase()} complete — inserted: ${levelInserted}, skipped: ${levelSkipped}, failed: ${levelFailed}`);
+    console.log(`\n✅ [${level.toUpperCase()}] Done — inserted: ${levelInserted}, skipped: ${levelSkipped}, failed: ${levelFailed}`);
   }
 
   // Final summary
-  console.log('\n' + '─'.repeat(50));
-  console.log('📊 BULK SEED COMPLETE');
-  console.log('─'.repeat(50));
-  console.log(`   ✅ Inserted : ${totalInserted}`);
-  console.log(`   ⏭️  Skipped  : ${totalSkipped}`);
-  console.log(`   ❌ Failed   : ${totalFailed}`);
-
-  // Show final dictionary stats
   const stats = await Word.aggregate([
     { $group: { _id: '$level', count: { $sum: 1 } } },
     { $sort: { _id: 1 } }
   ]);
 
-  console.log('\n📚 Dictionary Stats:');
+  console.log('\n' + '═'.repeat(50));
+  console.log('🎉 BULK SEED COMPLETE');
+  console.log('═'.repeat(50));
+  console.log(`   ✅ Inserted  : ${totalInserted}`);
+  console.log(`   ⏭️  Skipped   : ${totalSkipped}`);
+  console.log(`   ❌ Failed    : ${totalFailed}`);
+  console.log('\n📚 Dictionary by Difficulty:');
   let total = 0;
   stats.forEach((s: any) => {
     console.log(`   ${s._id.padEnd(14)}: ${s.count} words`);
     total += s.count;
   });
   console.log(`   ${'TOTAL'.padEnd(14)}: ${total} words`);
-  console.log('─'.repeat(50) + '\n');
 
+  if (failedWords.length > 0) {
+    console.log(`\n⚠️  Failed words (can retry): ${failedWords.join(', ')}`);
+  }
+
+  console.log('═'.repeat(50) + '\n');
   process.exit(0);
 }
 
 bulkSeed().catch(err => {
-  console.error('Bulk seed failed:', err);
+  console.error('❌ Bulk seed crashed:', err);
   process.exit(1);
 });
