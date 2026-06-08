@@ -1,0 +1,245 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
+import { ArrowLeft, Volume2, Loader2, Send, Edit2, Trash2, Check, X, Clock } from 'lucide-react';
+import { searchWord, getSentences, saveSentence, editSentence, deleteSentence } from '../services/api';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+
+const WordDetail: React.FC = () => {
+  const { term } = useParams<{ term: string }>();
+  const navigate = useNavigate();
+  const [wordData, setWordData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [sentences, setSentences] = useState<any[]>([]);
+  const [newSentence, setNewSentence] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
+
+  useEffect(() => {
+    if (!term) return;
+    loadWord();
+  }, [term]);
+
+  const loadWord = async () => {
+    setLoading(true);
+    try {
+      const res = await searchWord(term!);
+      if (res.found) {
+        setWordData(res.data);
+        const sentRes = await getSentences(res.data.word);
+        setSentences(sentRes.sentences || []);
+      } else {
+        toast.info(`"${term}" is queued for processing. Check back tomorrow!`);
+        navigate(-1);
+      }
+    } catch {
+      toast.error('Failed to load word.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!wordData || !newSentence.trim()) return;
+    setSaving(true);
+    try {
+      await saveSentence(wordData.word, newSentence.trim());
+      const res = await getSentences(wordData.word);
+      setSentences(res.sentences || []);
+      setNewSentence('');
+      toast.success('Sentence saved!');
+    } catch {
+      toast.error('Failed to save sentence.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = async (sentenceId: string) => {
+    if (!wordData || !editText.trim()) return;
+    try {
+      await editSentence(wordData.word, sentenceId, editText.trim());
+      const res = await getSentences(wordData.word);
+      setSentences(res.sentences || []);
+      setEditingId(null);
+      toast.success('Sentence updated!');
+    } catch {
+      toast.error('Failed to update.');
+    }
+  };
+
+  const handleDelete = async (sentenceId: string) => {
+    if (!wordData) return;
+    try {
+      await deleteSentence(wordData.word, sentenceId);
+      setSentences(sentences.filter((s: any) => s._id !== sentenceId));
+      toast.success('Sentence removed.');
+    } catch {
+      toast.error('Failed to delete.');
+    }
+  };
+
+  const playAudio = () => {
+    if (!term) return;
+    const utterance = new SpeechSynthesisUtterance(term);
+    utterance.rate = 0.8;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+      <Loader2 className="w-12 h-12 text-brand-accent animate-spin" />
+      <p className="text-xs font-bold text-brand-muted uppercase tracking-[0.2em]">Looking up word...</p>
+    </div>
+  );
+
+  if (!wordData) return <div className="text-center py-20 font-serif italic">Word not found.</div>;
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-12 pb-32">
+      <header className="flex items-center justify-between sticky top-24 glass py-4 px-8 z-30 rounded-full border border-brand-border">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-muted hover:text-brand-primary transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+        <span className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border ${
+          wordData.level === 'beginner' ? 'bg-green-50 border-green-200 text-green-700' :
+          wordData.level === 'intermediate' ? 'bg-blue-50 border-blue-200 text-blue-700' :
+          wordData.level === 'advanced' ? 'bg-amber-50 border-amber-200 text-amber-700' :
+          'bg-pink-50 border-pink-200 text-pink-700'
+        }`}>
+          {wordData.level}
+        </span>
+      </header>
+
+      {/* Word Hero */}
+      <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 text-center">
+        <h1 className="text-7xl md:text-9xl font-serif font-black italic tracking-tighter leading-none lowercase text-brand-accent">
+          {wordData.word}
+        </h1>
+        <div className="flex items-center justify-center gap-6">
+          <button onClick={playAudio} className="flex items-center gap-2 text-brand-muted hover:text-brand-accent transition-colors">
+            <Volume2 className="w-5 h-5" />
+            <span className="text-lg font-serif italic">Hear it</span>
+          </button>
+          <span className="w-1.5 h-1.5 bg-brand-border rounded-full"></span>
+          <span className="text-brand-accent font-bold uppercase tracking-[0.2em] text-[10px]">{wordData.partOfSpeech}</span>
+        </div>
+      </motion.section>
+
+      {/* Definition */}
+      <div className="card p-12 bg-white space-y-8">
+        <p className="text-2xl md:text-3xl font-sans font-medium leading-relaxed text-brand-primary">
+          {wordData.meaning}
+        </p>
+        <div className="pl-6 border-l-4 border-brand-accent bg-brand-accent/5 py-5 pr-6 rounded-r-2xl text-xl text-brand-primary font-serif leading-relaxed shadow-sm">
+          "{wordData.sentence}"
+        </div>
+
+        {/* Synonyms & Antonyms */}
+        <div className="grid grid-cols-2 gap-6 pt-6 border-t border-brand-border">
+          {wordData.synonyms?.length > 0 && (
+            <div className="space-y-3">
+              <p className="technical-label">Synonyms</p>
+              <div className="flex flex-wrap gap-2">
+                {wordData.synonyms.map((s: string) => (
+                  <Link key={s} to={`/word/${s}`} className="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-bold rounded-lg border border-green-200 hover:bg-green-100 transition-colors">{s}</Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {wordData.antonyms?.length > 0 && (
+            <div className="space-y-3">
+              <p className="technical-label">Antonyms</p>
+              <div className="flex flex-wrap gap-2">
+                {wordData.antonyms.map((a: string) => (
+                  <Link key={a} to={`/word/${a}`} className="px-3 py-1 bg-red-50 text-red-700 text-[10px] font-bold rounded-lg border border-red-200 hover:bg-red-100 transition-colors">{a}</Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Etymology */}
+      {wordData.etymology && (
+        <div className="card p-8 bg-slate-900 border-slate-800 space-y-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Etymology</p>
+          <p className="text-sm font-serif italic text-slate-300 leading-relaxed">{wordData.etymology}</p>
+        </div>
+      )}
+
+      {/* Write Sentences */}
+      <div className="card p-10 space-y-8">
+        <h4 className="technical-label">Your Sentences</h4>
+        <div className="relative user-input-area p-2 rounded-3xl">
+          <textarea
+            value={newSentence}
+            onChange={(e) => setNewSentence(e.target.value)}
+            placeholder={`Use "${wordData.word}" in your own sentence...`}
+            className="w-full h-36 p-6 bg-white border border-brand-accent/30 rounded-3xl font-serif italic text-xl focus:outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/10 transition-all resize-none"
+          />
+          <button
+            onClick={handleSave}
+            disabled={saving || !newSentence.trim()}
+            className="absolute bottom-6 right-6 px-6 py-3 bg-brand-accent text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            Save
+          </button>
+        </div>
+
+        {/* Saved Sentences */}
+        <div className="space-y-4">
+          {sentences.length === 0 && (
+            <p className="text-xs italic text-brand-muted text-center py-4 opacity-50">No sentences yet. Write your first one above!</p>
+          )}
+          {sentences.map((s: any) => (
+            <div key={s._id} className="group bg-brand-bg p-6 rounded-2xl border border-brand-border space-y-3 relative">
+              {editingId === s._id ? (
+                <div className="space-y-3">
+                  <textarea
+                    autoFocus
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className="w-full bg-white p-4 rounded-xl font-serif italic text-lg focus:outline-none focus:ring-1 ring-brand-accent resize-none h-20"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button onClick={() => setEditingId(null)} className="px-4 py-1.5 text-[9px] font-bold uppercase tracking-widest text-brand-muted hover:text-brand-primary flex items-center gap-1">
+                      <X className="w-3 h-3" /> Cancel
+                    </button>
+                    <button onClick={() => handleEdit(s._id)} className="px-6 py-1.5 bg-brand-primary text-white rounded-full text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Save
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p className="text-lg font-serif italic text-brand-primary">"{s.text}"</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[8px] font-bold text-brand-muted uppercase">
+                      <Clock className="w-2.5 h-2.5" />
+                      {new Date(s.createdAt).toLocaleDateString()}
+                    </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => { setEditingId(s._id); setEditText(s.text); }} className="p-2 text-brand-muted hover:text-brand-accent">
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => handleDelete(s._id)} className="p-2 text-brand-muted hover:text-red-500">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WordDetail;
