@@ -1,7 +1,7 @@
 // V2 API Service — replaces all Firebase/Firestore calls
-// All requests go to http://localhost:5000/api/*
+// In production, VITE_API_URL points to the Render backend
 
-const BASE = '/api';
+const BASE = `${import.meta.env.VITE_API_URL || ''}/api`;
 
 // Get user ID from localStorage (set after Firebase auth)
 export function getUserId(): string {
