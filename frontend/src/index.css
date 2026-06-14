@@ -64,7 +64,7 @@
   }
 
   .btn-primary {
-    @apply bg-brand-primary text-white px-8 py-3 rounded-2xl font-bold hover:bg-brand-accent hover:text-white transition-all duration-300 active:scale-95 shadow-xl shadow-brand-primary/10;
+    @apply bg-brand-primary text-brand-bg px-8 py-3 rounded-2xl font-bold hover:bg-brand-accent hover:text-white transition-all duration-300 active:scale-95 shadow-xl shadow-brand-primary/10;
   }
 
   .technical-label {
