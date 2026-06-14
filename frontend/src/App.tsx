@@ -2,9 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster } from 'sonner';
-import { BookOpen, LayoutDashboard, Zap, LogOut, User as UserIcon, BookMarked } from 'lucide-react';
+import { BookOpen, LayoutDashboard, Zap, LogOut, User as UserIcon, BookMarked, Moon, Sun } from 'lucide-react';
 import { LEVEL_TEXT_COLORS } from './utils/colors';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { ThemeProvider, useTheme } from './hooks/useTheme';
 import Dashboard from './pages/Dashboard';
 import Library from './pages/Library';
 import Practice from './pages/Practice';
@@ -15,6 +16,7 @@ import YourWords from './pages/YourWords';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
 
   const navItems = [
@@ -25,7 +27,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-brand-bg text-brand-primary font-sans flex flex-col">
+    <div className="min-h-screen bg-brand-bg text-brand-primary font-sans flex flex-col transition-colors duration-300">
       {/* Top Nav */}
       <header className="h-20 glass sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 shrink-0">
         <div className="flex items-center gap-10">
@@ -44,7 +46,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </nav>
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
+          {/* Dark mode toggle */}
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-xl border border-brand-border bg-brand-surface flex items-center justify-center text-brand-muted hover:text-brand-accent hover:border-brand-accent transition-all duration-300"
+            aria-label="Toggle dark mode"
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark
+              ? <Sun className="w-4 h-4" />
+              : <Moon className="w-4 h-4" />
+            }
+          </button>
+
           <div className="hidden sm:flex items-center gap-3">
             <div className="text-right">
               <p className="text-xs font-bold truncate max-w-[150px]">{profile?.displayName}</p>
@@ -84,7 +99,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-brand-border bg-white text-center">
+      <footer className="py-12 border-t border-brand-border bg-brand-surface text-center transition-colors duration-300">
         <div className="max-w-2xl mx-auto px-6 space-y-4">
           <h3 className="text-xl font-serif font-black italic">Wordly.</h3>
           <p className="text-sm text-brand-muted max-w-sm mx-auto leading-relaxed">
@@ -99,20 +114,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </footer>
 
       {/* Mobile Nav */}
-      <nav className="md:hidden fixed bottom-6 left-6 right-6 h-16 bg-brand-primary text-white rounded-2xl flex items-center justify-around px-4 shadow-2xl z-50">
+      <nav className="md:hidden fixed bottom-6 left-6 right-6 h-16 bg-brand-primary text-brand-bg rounded-2xl flex items-center justify-around px-4 shadow-2xl z-50 transition-colors duration-300">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center space-y-1 transition-all ${isActive ? 'text-brand-accent scale-110' : 'text-white/40'}`}
+              className={`flex flex-col items-center space-y-1 transition-all ${isActive ? 'text-brand-accent scale-110' : 'opacity-40'}`}
             >
               <item.icon className="w-5 h-5" />
             </Link>
           );
         })}
-        <button onClick={logout} className="text-white/40">
+        <button onClick={toggleTheme} className="opacity-40 hover:opacity-100 transition-opacity">
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
+        <button onClick={logout} className="opacity-40 hover:opacity-100 transition-opacity">
           <LogOut className="w-5 h-5" />
         </button>
       </nav>
@@ -137,18 +155,20 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 export default function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Toaster position="top-center" richColors />
-        <Routes>
-          <Route path="/welcome" element={<Landing />} />
-          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
-          <Route path="/practice" element={<PrivateRoute><Practice /></PrivateRoute>} />
-          <Route path="/your-words" element={<PrivateRoute><YourWords /></PrivateRoute>} />
-          <Route path="/quiz" element={<PrivateRoute><Quiz /></PrivateRoute>} />
-          <Route path="/word/:term" element={<PrivateRoute><WordDetail /></PrivateRoute>} />
-        </Routes>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <Toaster position="top-center" richColors />
+          <Routes>
+            <Route path="/welcome" element={<Landing />} />
+            <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
+            <Route path="/practice" element={<PrivateRoute><Practice /></PrivateRoute>} />
+            <Route path="/your-words" element={<PrivateRoute><YourWords /></PrivateRoute>} />
+            <Route path="/quiz" element={<PrivateRoute><Quiz /></PrivateRoute>} />
+            <Route path="/word/:term" element={<PrivateRoute><WordDetail /></PrivateRoute>} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

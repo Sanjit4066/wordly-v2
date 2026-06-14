@@ -7,10 +7,10 @@ import { Link, useNavigate } from 'react-router-dom';
 type Level = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 
 const LEVEL_COLORS: Record<Level, string> = {
-  beginner: 'bg-green-50 border-green-200 text-green-700',
-  intermediate: 'bg-blue-50 border-blue-200 text-blue-700',
-  advanced: 'bg-amber-50 border-amber-200 text-amber-700',
-  expert: 'bg-pink-50 border-pink-200 text-pink-700',
+  beginner:     'bg-green-50  dark:bg-green-950  border-green-200  dark:border-green-800  text-green-700  dark:text-green-400',
+  intermediate: 'bg-blue-50   dark:bg-blue-950   border-blue-200   dark:border-blue-800   text-blue-700   dark:text-blue-400',
+  advanced:     'bg-amber-50  dark:bg-amber-950  border-amber-200  dark:border-amber-800  text-amber-700  dark:text-amber-400',
+  expert:       'bg-pink-50   dark:bg-pink-950   border-pink-200   dark:border-pink-800   text-pink-700   dark:text-pink-400',
 };
 
 const Library: React.FC = () => {
@@ -95,7 +95,7 @@ const Library: React.FC = () => {
         </div>
 
         {/* Search */}
-        <form onSubmit={handleSearch} className="flex gap-4 items-center bg-white p-2 rounded-[2rem] border border-brand-border shadow-sm">
+        <form onSubmit={handleSearch} className="flex gap-4 items-center bg-brand-surface p-2 rounded-[2rem] border border-brand-border shadow-sm">
           <div className="relative flex-1">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
             <input
@@ -112,7 +112,7 @@ const Library: React.FC = () => {
         </form>
 
         {searchResult?.queued && (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-800 text-sm font-serif italic">
+          <div className="p-4 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-2xl text-amber-800 dark:text-amber-300 text-sm font-serif italic">
             "{searchResult.word}" isn't in our dictionary yet — queued for tonight's batch processing! Check back tomorrow.
           </div>
         )}
@@ -124,7 +124,7 @@ const Library: React.FC = () => {
           <button
             key={level}
             onClick={() => setActiveLevel(level)}
-            className={`p-6 rounded-3xl border-2 transition-all text-left space-y-2 ${activeLevel === level ? LEVEL_COLORS[level] + ' border-current' : 'bg-white border-brand-border hover:border-brand-accent/30'}`}
+            className={`p-6 rounded-3xl border-2 transition-all text-left space-y-2 ${activeLevel === level ? LEVEL_COLORS[level] + ' border-current' : 'bg-brand-surface border-brand-border hover:border-brand-accent/30'}`}
           >
             <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">{level}</p>
             <p className="text-3xl font-serif font-black italic">{stats[level] || 0}</p>
@@ -151,7 +151,7 @@ const Library: React.FC = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     whileHover={{ y: -8 }}
-                    className="card p-8 group h-full flex flex-col space-y-6 bg-white"
+                    className="card p-8 group h-full flex flex-col space-y-6"
                   >
                     <div className="flex justify-between items-start">
                       <div className="w-12 h-12 rounded-2xl bg-brand-bg flex items-center justify-center font-serif italic text-2xl font-black group-hover:bg-brand-accent group-hover:text-white transition-all duration-500">
@@ -186,7 +186,7 @@ const Library: React.FC = () => {
                 <button 
                   onClick={handleLoadMore} 
                   disabled={loadingMore} 
-                  className="btn-secondary px-8 py-4 bg-white border border-brand-border shadow-sm hover:border-brand-accent hover:text-brand-accent transition-all duration-300 rounded-full font-serif italic font-bold disabled:opacity-50"
+                  className="btn-secondary px-8 py-4 bg-brand-surface border border-brand-border shadow-sm hover:border-brand-accent hover:text-brand-accent transition-all duration-300 rounded-full font-serif italic font-bold disabled:opacity-50"
                 >
                   {loadingMore ? 'Loading...' : 'Load More Words'}
                 </button>

@@ -1,21 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap');
 @import "tailwindcss";
 
-@theme {
+/* ── Light mode tokens ──────────────────────────────────────────────────────── */
+:root {
+  --brand-bg: #FDFCFB;
+  --brand-surface: #FFFFFF;
+  --brand-primary: #1A1A1A;
+  --brand-accent: #E27D60;
+  --brand-muted: #8D8D8D;
+  --brand-border: #E8E6E1;
+}
+
+/* ── Dark mode tokens ───────────────────────────────────────────────────────── */
+.dark {
+  --brand-bg: #0E0E0E;
+  --brand-surface: #1A1A1A;
+  --brand-primary: #F0EFED;
+  --brand-accent: #E27D60;
+  --brand-muted: #6A6A6A;
+  --brand-border: #2C2C2C;
+}
+
+/* ── Tailwind theme (reactive to CSS vars) ─────────────────────────────────── */
+@theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Newsreader", "Georgia", serif;
 
-  --color-brand-bg: #FDFCFB;
-  --color-brand-surface: #FFFFFF;
-  --color-brand-primary: #1A1A1A;
-  --color-brand-accent: #E27D60;
-  --color-brand-muted: #8D8D8D;
-  --color-brand-border: #E8E6E1;
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-muted: var(--brand-muted);
+  --color-brand-border: var(--brand-border);
 }
 
 @layer base {
   body {
-    @apply bg-brand-bg text-brand-primary font-sans antialiased;
+    @apply bg-brand-bg text-brand-primary font-sans antialiased transition-colors duration-300;
   }
 
   h1, h2, h3, h4, .serif {
@@ -25,7 +46,7 @@
 
 @layer components {
   .card {
-    @apply bg-white border border-brand-border rounded-3xl shadow-sm hover:shadow-lg hover:shadow-brand-primary/5 transition-all duration-500;
+    @apply bg-brand-surface border border-brand-border rounded-3xl shadow-sm hover:shadow-lg hover:shadow-brand-primary/5 transition-all duration-500;
   }
 
   .nav-link {
@@ -41,7 +62,7 @@
   }
 
   .btn-primary {
-    @apply bg-brand-primary text-white px-8 py-3 rounded-2xl font-bold hover:bg-brand-accent transition-all duration-300 active:scale-95 shadow-xl shadow-brand-primary/10;
+    @apply bg-brand-primary text-brand-bg px-8 py-3 rounded-2xl font-bold hover:bg-brand-accent hover:text-white transition-all duration-300 active:scale-95 shadow-xl shadow-brand-primary/10;
   }
 
   .technical-label {
@@ -62,7 +83,7 @@
 }
 
 .user-input-area {
-  border-left: 4px solid var(--color-brand-accent);
+  border-left: 4px solid var(--brand-accent);
   background: linear-gradient(135deg, rgba(226, 125, 96, 0.04) 0%, rgba(226, 125, 96, 0.01) 100%);
   position: relative;
 }
@@ -76,7 +97,7 @@
   font-weight: 800;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--color-brand-accent);
-  background: var(--color-brand-bg);
+  color: var(--brand-accent);
+  background: var(--brand-bg);
   padding: 0 8px;
 }

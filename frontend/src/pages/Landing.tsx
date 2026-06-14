@@ -31,7 +31,7 @@ const Landing: React.FC = () => {
             A refined digital companion for expanding your linguistic repertoire and mastering the nuance of language.
           </p>
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-brand-border rounded-full text-[10px] font-bold uppercase tracking-widest text-brand-muted">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-surface border border-brand-border rounded-full text-[10px] font-bold uppercase tracking-widest text-brand-muted">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             V2 — Now powered by MongoDB + Gemini AI
           </div>

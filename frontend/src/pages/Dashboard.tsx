@@ -284,7 +284,7 @@ const Dashboard: React.FC = () => {
         { label: 'Familiar', value: mastery.familiar || 0, icon: BookOpen, color: 'text-blue-500' },
         { label: 'Practiced', value: mastery.practiced || 0, icon: TrendingUp, color: 'text-green-500' },
       ].map((stat) => (
-        <div key={stat.label} className="card p-6 bg-white space-y-2">
+        <div key={stat.label} className="card p-6 space-y-2">
           <stat.icon className={`w-5 h-5 ${stat.color}`} />
           <p className="text-2xl font-serif font-black italic">{stat.value}</p>
           <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">{stat.label}</p>
@@ -301,9 +301,9 @@ const Dashboard: React.FC = () => {
         <div
           className="relative max-w-2xl w-full px-10 py-6 rounded-[3rem] text-center"
           style={{
-            background: 'linear-gradient(135deg, rgba(226,125,96,0.13) 0%, rgba(226,125,96,0.06) 60%, rgba(253,252,251,0.9) 100%)',
+            background: 'linear-gradient(135deg, rgba(226,125,96,0.10) 0%, rgba(226,125,96,0.04) 60%, transparent 100%)',
             border: '1.5px solid rgba(226,125,96,0.25)',
-            boxShadow: '0 4px 32px rgba(226,125,96,0.10), inset 0 1px 0 rgba(255,255,255,0.8)',
+            boxShadow: '0 4px 32px rgba(226,125,96,0.08)',
           }}
         >
           {/* decorative big quote mark */}
@@ -345,7 +345,7 @@ const Dashboard: React.FC = () => {
               )}
             </button>
             {showNotifs && (
-              <div className="absolute right-0 top-12 w-80 bg-white border border-brand-border rounded-3xl shadow-2xl z-50 p-4 space-y-3 max-h-80 overflow-y-auto">
+              <div className="absolute right-0 top-12 w-80 bg-brand-surface border border-brand-border rounded-3xl shadow-2xl z-50 p-4 space-y-3 max-h-80 overflow-y-auto">
                 {notifications.length === 0 ? (
                   <p className="text-sm text-brand-muted italic text-center py-4">No notifications yet</p>
                 ) : notifications.map((n: any) => (
@@ -365,7 +365,7 @@ const Dashboard: React.FC = () => {
               <span className="text-[10px] font-bold uppercase tracking-widest">{profile?.level}</span>
             </button>
             {showLevelMenu && (
-              <div className="absolute right-0 top-12 bg-white border border-brand-border rounded-3xl shadow-2xl z-50 p-3 space-y-1 w-44">
+              <div className="absolute right-0 top-12 bg-brand-surface border border-brand-border rounded-3xl shadow-2xl z-50 p-3 space-y-1 w-44">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-brand-muted px-3 pb-2">Change Level</p>
                 {(['beginner', 'intermediate', 'advanced', 'expert'] as const).map((d) => (
                   <button
@@ -390,7 +390,7 @@ const Dashboard: React.FC = () => {
             <h4 className="technical-label">Morning Recall — Yesterday's Word</h4>
           </div>
 
-          <div className="card p-10 md:p-16 bg-white space-y-10">
+          <div className="card p-10 md:p-16 space-y-10">
             <div className="text-center space-y-4">
               <p className="technical-label">Do you remember this word?</p>
               <h3 className="text-7xl md:text-9xl font-serif font-black italic text-brand-accent lowercase">
@@ -406,12 +406,12 @@ const Dashboard: React.FC = () => {
             {selfMark === null ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-lg mx-auto">
                 <button onClick={() => handleSelfMark('got_it')} disabled={markLoading}
-                  className="p-8 bg-green-50 border-2 border-green-200 rounded-3xl text-green-700 font-bold hover:bg-green-100 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 space-y-2">
+                  className="p-8 bg-green-50 dark:bg-green-950 border-2 border-green-200 dark:border-green-800 rounded-3xl text-green-700 dark:text-green-400 font-bold hover:bg-green-100 dark:hover:bg-green-900 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 space-y-2">
                   <CheckCircle2 className="w-8 h-8 mx-auto" />
                   <p className="text-sm uppercase tracking-widest">Got it!</p>
                 </button>
                 <button onClick={() => handleSelfMark('needs_practice')} disabled={markLoading}
-                  className="p-8 bg-amber-50 border-2 border-amber-200 rounded-3xl text-amber-700 font-bold hover:bg-amber-100 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 space-y-2">
+                  className="p-8 bg-amber-50 dark:bg-amber-950 border-2 border-amber-200 dark:border-amber-800 rounded-3xl text-amber-700 dark:text-amber-400 font-bold hover:bg-amber-100 dark:hover:bg-amber-900 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 space-y-2">
                   <RotateCcw className="w-8 h-8 mx-auto" />
                   <p className="text-sm uppercase tracking-widest">Need Practice</p>
                 </button>
@@ -448,7 +448,7 @@ const Dashboard: React.FC = () => {
             <h4 className="technical-label">Today's Word</h4>
           </div>
 
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="card p-12 md:p-20 bg-white">
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="card p-12 md:p-20">
             <div className="space-y-10">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
@@ -520,7 +520,7 @@ const Dashboard: React.FC = () => {
 
                 {/* Etymology */}
                 {todayWord.etymology && (
-                  <div className="p-6 bg-slate-900 rounded-2xl space-y-2">
+                  <div className="p-6 bg-slate-900 dark:bg-black/60 rounded-2xl space-y-2">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Etymology</p>
                     <p className="text-sm text-slate-300 font-serif italic">{todayWord.etymology}</p>
                   </div>
@@ -534,7 +534,7 @@ const Dashboard: React.FC = () => {
                       value={sentence}
                       onChange={(e) => setSentence(e.target.value)}
                       placeholder={`Use "${todayWord.word}" in your own sentence...`}
-                      className="w-full h-32 p-6 bg-white border border-brand-accent/30 rounded-3xl font-serif italic text-lg focus:outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/10 transition-all resize-none"
+                      className="w-full h-32 p-6 bg-white dark:bg-brand-surface border border-brand-accent/30 rounded-3xl font-serif italic text-lg focus:outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/10 transition-all resize-none"
                     />
                     <button
                       onClick={handleSaveSentence}
@@ -578,7 +578,7 @@ const Dashboard: React.FC = () => {
           </motion.div>
 
           {/* ── Mark as Mastered / Familiar ─────────────────────────────────── */}
-          <div className="card p-8 bg-white space-y-5">
+          <div className="card p-8 space-y-5">
             <div className="flex items-center gap-3">
               <Star className="w-4 h-4 text-brand-accent" />
               <h4 className="technical-label">Mark Your Progress</h4>

@@ -5,10 +5,10 @@ import { getUserWords } from '../services/api';
 import { Link } from 'react-router-dom';
 
 const LEVEL_COLORS: Record<string, string> = {
-  beginner: 'bg-green-50 border-green-200 text-green-700',
-  intermediate: 'bg-blue-50 border-blue-200 text-blue-700',
-  advanced: 'bg-amber-50 border-amber-200 text-amber-700',
-  expert: 'bg-pink-50 border-pink-200 text-pink-700',
+  beginner:     'bg-green-50  dark:bg-green-950  border-green-200  dark:border-green-800  text-green-700  dark:text-green-400',
+  intermediate: 'bg-blue-50   dark:bg-blue-950   border-blue-200   dark:border-blue-800   text-blue-700   dark:text-blue-400',
+  advanced:     'bg-amber-50  dark:bg-amber-950  border-amber-200  dark:border-amber-800  text-amber-700  dark:text-amber-400',
+  expert:       'bg-pink-50   dark:bg-pink-950   border-pink-200   dark:border-pink-800   text-pink-700   dark:text-pink-400',
 };
 
 const YourWords: React.FC = () => {
@@ -55,7 +55,7 @@ const YourWords: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card p-20 text-center space-y-6 bg-white border-dashed"
+          className="card p-20 text-center space-y-6 border-dashed"
         >
           <BookMarked className="w-14 h-14 text-brand-accent/40 mx-auto" />
           <h3 className="text-2xl font-serif font-black italic text-brand-muted">
@@ -77,7 +77,7 @@ const YourWords: React.FC = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.04 }}
-              className="card bg-white overflow-hidden"
+              className="card overflow-hidden"
             >
               {/* Word header row — clickable to expand */}
               <button
