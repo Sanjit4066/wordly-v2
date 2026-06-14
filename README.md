@@ -2,8 +2,8 @@
 
 > AI-Powered Vocabulary & Communication App — Complete Architecture Rebuild
 
-**Author:** Sanjit Kushwaha (4th Sem, AIML B.Tech)  
-**Version:** 2.0 — Migration from V1 (Firebase Firestore → MongoDB)  
+**Author:** Sanjit Kushwaha (B.Tech CSE AI, 2026)  
+**Version:** 2.0 — Migration from V1 (Wordly: A Word Daily)  
 **Stack:** React 19 · TypeScript · MongoDB · Express · Gemini AI
 
 ---
@@ -11,11 +11,22 @@
 ## Screenshots
 
 <div align="center">
-  <img src="./docs/dashboard.png" alt="Wordly Dashboard View" width="45%" />
+  <img src="https://placehold.co/600x400?text=Dashboard+Screenshot" alt="Wordly Dashboard View" width="45%" />
   &nbsp;
-  <img src="./docs/practice.png" alt="Wordly Practice View" width="45%" />
-  <p><em>(Add your screenshots as <code>dashboard.png</code> and <code>practice.png</code> inside a <code>docs/</code> folder to see them here!)</em></p>
+  <img src="https://placehold.co/600x400?text=Practice+Screenshot" alt="Wordly Practice View" width="45%" />
+  <p><em>(Replace the <code>src</code> links above with the actual paths to your screenshots on GitHub)</em></p>
 </div>
+
+---
+
+## The Evolution: V1 vs V2 (Why we rebuilt)
+
+Our first version, **[Wordly: A Word Daily](https://github.com/Sanjit4066/Wordly-A-Word-Daily)**, was a great proof of concept but faced severe architectural bottlenecks:
+1. **API Cost Explosions:** V1 called the Gemini AI for *every single interaction*. As the user base grew, API quotas were instantly exhausted. 
+2. **Database Limitations:** Firebase Firestore lacked the complex querying capabilities needed for a massive, heavily-relational dictionary.
+3. **One Size Fits All:** V1 gave every user the exact same "Word of the Day", regardless of whether they were a beginner or a native speaker.
+
+**Wordly V2** completely solves these problems. By relying on a "Dictionary First, AI Second" philosophy, V2 only calls the AI *once per unique word* during a nightly batch process. Once a word is processed, it is permanently stored in MongoDB and served for free to all future users. We also introduced 4 distinct difficulty levels, ensuring the "Word of the Day" is personalized to your exact vocabulary level.
 
 ---
 
