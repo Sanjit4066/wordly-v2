@@ -234,7 +234,7 @@ router.get('/requests', async (req: Request, res: Response) => {
     }, {});
 
     const enrichedRequests = requests.map((r) => {
-      const plain = r.toObject();
+      const plain: any = r.toObject();
       if (plain.status === 'done' && wordsMap[plain.word]) {
         plain.dictionaryData = wordsMap[plain.word];
       }
