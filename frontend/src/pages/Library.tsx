@@ -106,7 +106,7 @@ const Library: React.FC = () => {
               className="w-full pl-14 pr-4 py-4 bg-transparent text-sm focus:outline-none"
             />
           </div>
-          <button type="submit" disabled={searching || !searchTerm.trim()} className="btn-primary px-8 py-3 disabled:opacity-50">
+          <button type="submit" disabled={searching || !searchTerm.trim()} className="btn-primary px-8 py-3">
             {searching ? 'Searching...' : 'Search'}
           </button>
         </form>

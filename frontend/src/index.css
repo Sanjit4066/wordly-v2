@@ -64,7 +64,10 @@
   }
 
   .btn-primary {
-    @apply bg-brand-primary text-brand-bg px-8 py-3 rounded-2xl font-bold hover:bg-brand-accent hover:text-white transition-all duration-300 active:scale-95 shadow-xl shadow-brand-primary/10;
+    @apply bg-brand-primary text-brand-bg px-8 py-3 rounded-2xl font-bold transition-all duration-300 shadow-xl shadow-brand-primary/10 disabled:bg-brand-bg disabled:text-brand-muted disabled:border disabled:border-brand-border disabled:shadow-none disabled:cursor-not-allowed;
+  }
+  .btn-primary:not(:disabled) {
+    @apply hover:bg-brand-accent hover:text-white active:scale-95;
   }
 
   .technical-label {

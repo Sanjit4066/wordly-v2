@@ -86,7 +86,7 @@ const Practice: React.FC = () => {
           <button
             type="submit"
             disabled={!searchTerm.trim() || loading}
-            className="absolute right-4 top-4 bottom-4 px-8 bg-brand-primary text-white rounded-[1.8rem] flex items-center gap-2 hover:bg-brand-accent transition-all disabled:opacity-30 active:scale-95"
+            className="absolute right-4 top-4 bottom-4 px-8 bg-brand-primary text-brand-bg rounded-[1.8rem] flex items-center gap-2 hover:bg-brand-accent hover:text-white transition-all disabled:bg-brand-bg disabled:text-brand-muted disabled:border disabled:border-brand-border disabled:active:scale-100 active:scale-95"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
           </button>
