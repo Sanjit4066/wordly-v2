@@ -4,6 +4,7 @@
 
 **Author:** Sanjit Kushwaha (B.Tech CSE AI, 2nd Year)  
 **Version:** 2.0 — Migration from V1 (Wordly: A Word Daily)  
+**Live Demo:** [https://wordly-v2.vercel.app](https://wordly-v2.vercel.app)  
 **Stack:** React 19 · TypeScript · MongoDB · Express · Gemini AI
 
 ---
@@ -39,6 +40,8 @@ Our first version, **[Wordly: A Word Daily](https://github.com/Sanjit4066/Wordly
 | Spaced Repetition | ❌ | ✅ Ebbinghaus curve |
 | Notifications | ❌ | ✅ In-app panel |
 | Progress Heatmap | ❌ | ✅ GitHub-style |
+| Community Contributions | ❌ | ✅ Track & view your added words |
+| Dark Mode | ❌ | ✅ Fully supported with toggle |
 
 ---
 
@@ -118,6 +121,7 @@ npm run dev
 | GET | `/api/word/daily` | Personalized Word of Day by user level |
 | GET | `/api/word/level/:level` | Browse words by difficulty level |
 | GET | `/api/word/stats` | Dictionary count per difficulty level |
+| GET | `/api/word/requests` | Fetch user's submitted word contributions |
 
 ### Revision Endpoints
 
