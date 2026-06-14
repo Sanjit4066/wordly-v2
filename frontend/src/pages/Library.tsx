@@ -18,27 +18,49 @@ const Library: React.FC = () => {
   const [words, setWords] = useState<any[]>([]);
   const [stats, setStats] = useState<any>({});
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResult, setSearchResult] = useState<any>(null);
   const [searching, setSearching] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadWords(activeLevel);
+    setPage(1);
+    loadWords(activeLevel, 1);
   }, [activeLevel]);
 
   useEffect(() => {
     getDictionaryStats().then((res) => setStats(res.byLevel || {}));
   }, []);
 
-  const loadWords = async (level: Level) => {
-    setLoading(true);
+  const loadWords = async (level: Level, pageNum: number) => {
+    if (pageNum === 1) setLoading(true);
+    else setLoadingMore(true);
+
     try {
-      const res = await getWordsByLevel(level);
-      setWords(res.words || []);
+      const res = await getWordsByLevel(level, pageNum);
+      const newWords = res.words || [];
+      
+      if (pageNum === 1) {
+        setWords(newWords);
+      } else {
+        setWords(prev => [...prev, ...newWords]);
+      }
+      
+      // If we got fewer than 20 words back, we've hit the end
+      setHasMore(newWords.length === 20);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    loadWords(activeLevel, nextPage);
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -119,6 +141,7 @@ const Library: React.FC = () => {
       ) : (
         <AnimatePresence mode="popLayout">
           {words.length > 0 ? (
+            <>
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {words.map((word: any) => (
                 <Link key={word.word} to={`/word/${word.word}`}>
@@ -157,6 +180,19 @@ const Library: React.FC = () => {
                 </Link>
               ))}
             </motion.div>
+            
+            {hasMore && (
+              <motion.div layout className="pt-12 flex justify-center">
+                <button 
+                  onClick={handleLoadMore} 
+                  disabled={loadingMore} 
+                  className="btn-secondary px-8 py-4 bg-white border border-brand-border shadow-sm hover:border-brand-accent hover:text-brand-accent transition-all duration-300 rounded-full font-serif italic font-bold disabled:opacity-50"
+                >
+                  {loadingMore ? 'Loading...' : 'Load More Words'}
+                </button>
+              </motion.div>
+            )}
+            </>
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-32 text-center card border-dashed opacity-50 flex flex-col items-center">
               <BookOpen className="w-12 h-12 mb-4 text-brand-muted" />

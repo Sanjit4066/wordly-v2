@@ -1,7 +1,41 @@
 import { Router, Request, Response } from 'express';
 import UserSentence from '../models/UserSentences';
+import Word from '../models/Dictionary';
 
 const router = Router();
+
+// GET /api/sentences/user/all — fetch all words the user has written sentences for
+router.get('/user/all', async (req: Request, res: Response) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) return res.status(401).json({ error: 'User ID required' });
+
+    const docs = await UserSentence.find({ userId }).sort({ updatedAt: -1 });
+    const wordIds = docs.map((d) => d.wordId);
+
+    // Fetch word details for each practiced word
+    const wordDetails = await Word.find({ word: { $in: wordIds } }, 'word meaning partOfSpeech level');
+    const wordMap = new Map(wordDetails.map((w) => [w.word, w]));
+
+    const result = docs.map((doc) => {
+      const activeSentences = doc.sentences.filter((s) => !s.isDeleted);
+      const wordInfo = wordMap.get(doc.wordId);
+      return {
+        wordId: doc.wordId,
+        meaning: wordInfo?.meaning || '',
+        partOfSpeech: wordInfo?.partOfSpeech || '',
+        level: wordInfo?.level || '',
+        sentenceCount: activeSentences.length,
+        lastPracticed: doc.updatedAt,
+        sentences: activeSentences,
+      };
+    }).filter((d) => d.sentenceCount > 0);
+
+    res.json({ words: result });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // GET /api/sentences/:wordId — fetch all active sentences for a word
 router.get('/:wordId', async (req: Request, res: Response) => {

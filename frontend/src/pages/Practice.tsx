@@ -1,14 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Search, Sparkles, TrendingUp, ArrowRight, BookOpen, Loader2 } from 'lucide-react';
-import { searchWord } from '../services/api';
+import { Search, Sparkles, TrendingUp, ArrowRight, BookOpen, Loader2, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { searchWord, getUserRequests } from '../services/api';
 import { toast } from 'sonner';
 
 const Practice: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [requests, setRequests] = useState<any[]>([]);
   const navigate = useNavigate();
+
+  const loadRequests = async () => {
+    try {
+      const res = await getUserRequests();
+      setRequests(res.requests || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    loadRequests();
+  }, []);
 
   const suggestions = [
     { word: 'ephemeral', mood: 'poetic' },
@@ -27,8 +41,12 @@ const Practice: React.FC = () => {
       const res = await searchWord(searchTerm.trim().toLowerCase());
       if (res.found) {
         navigate(`/word/${res.data.word}`);
+      } else if (res.validSpelling === false) {
+        toast.error(res.message);
       } else {
         toast.info(`"${searchTerm}" queued for tonight's batch processing! Check back tomorrow.`);
+        setSearchTerm('');
+        loadRequests();
       }
     } catch {
       toast.error('Search failed. Is the backend running?');
@@ -115,6 +133,25 @@ const Practice: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {requests.length > 0 && (
+        <section className="space-y-8 pt-8 border-t border-brand-border">
+          <h5 className="technical-label flex items-center gap-2">
+            <Clock className="w-4 h-4 text-brand-accent" />
+            Your Requested Words
+          </h5>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {requests.map((req) => (
+              <div key={req._id} className="p-4 bg-white border border-brand-border rounded-2xl flex items-center justify-between">
+                <span className="font-serif italic font-bold text-brand-primary lowercase">{req.word}</span>
+                {req.status === 'pending' && <Clock className="w-4 h-4 text-amber-500" />}
+                {req.status === 'done' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                {req.status === 'failed' && <XCircle className="w-4 h-4 text-red-500" />}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

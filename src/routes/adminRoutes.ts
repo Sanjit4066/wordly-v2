@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { triggerBatchNow } from '../cron/batchWordProcessor';
 import { triggerQuizGenerationNow } from '../cron/quizGenerator';
+import { triggerDailyExpansionNow } from '../cron/dailyDictionaryExpander';
 import Word from '../models/Dictionary';
 import WordRequest from '../models/WordRequests';
 
@@ -50,6 +51,41 @@ router.get('/dictionary-stats', async (req: Request, res: Response) => {
     const failed = await WordRequest.countDocuments({ status: 'failed' });
 
     res.json({ dictionary: stats, pendingRequests: pending, failedRequests: failed });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/trigger-expander — manually kick off the daily dictionary expansion
+router.post('/trigger-expander', async (req: Request, res: Response) => {
+  if (!isAdmin(req)) return res.status(403).json({ error: 'Forbidden' });
+
+  // Fire-and-forget — expansion takes ~75 min, don't block the HTTP response
+  res.json({ success: true, message: 'Daily dictionary expansion started in background. Check server logs for progress.' });
+
+  triggerDailyExpansionNow().catch((err) =>
+    console.error('❌ [Admin] Manual expander trigger failed:', err)
+  );
+});
+
+// GET /api/admin/expansion-status — how many master-list words are still unprocessed
+router.get('/expansion-status', async (req: Request, res: Response) => {
+  if (!isAdmin(req)) return res.status(403).json({ error: 'Forbidden' });
+
+  try {
+    const totalInDB = await Word.countDocuments({ addedVia: 'ai_batch' });
+    const stats = await Word.aggregate([
+      { $group: { _id: '$level', count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]);
+    const pending = await WordRequest.countDocuments({ status: 'pending' });
+
+    res.json({
+      totalAIBatchWords: totalInDB,
+      byLevel: stats,
+      pendingUserRequests: pending,
+      nextRunScheduled: '5:00 AM EST daily (10:00 UTC)',
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

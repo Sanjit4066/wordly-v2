@@ -1,8 +1,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DifficultyLevel } from '../models/Dictionary';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+function getModel() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY is missing in environment variables');
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return genAI.getGenerativeModel({ model: 'gemini-3.5-flash' });
+}
 
 function normalizeDifficultyLevel(raw: string): DifficultyLevel {
   const cleaned = raw.toLowerCase().trim();
@@ -13,10 +17,40 @@ function normalizeDifficultyLevel(raw: string): DifficultyLevel {
   return 'intermediate';
 }
 
+/**
+ * Retry wrapper with exponential backoff.
+ * Handles Gemini 429 (rate limit) errors by waiting and retrying.
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 4,
+  baseDelayMs = 15000
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      const is429 = err?.message?.includes('429') || err?.status === 429;
+      if (is429 && attempt < maxRetries) {
+        // Extract retry-after from the error message if available
+        const retryMatch = err.message?.match(/retryDelay["\s:]+(\d+)/);
+        const waitMs = retryMatch
+          ? parseInt(retryMatch[1]) * 1000 + 2000
+          : baseDelayMs * attempt; // exponential: 15s, 30s, 45s, 60s
+        console.warn(`⏳ [Gemini] Rate limited. Waiting ${Math.round(waitMs / 1000)}s before retry (attempt ${attempt}/${maxRetries})...`);
+        await new Promise((r) => setTimeout(r, waitMs));
+      } else {
+        throw err;
+      }
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+
 export interface AIWordData {
   word: string;
   meaning: string;
-  sentences: string[]; // Now 2 example sentences
+  sentences: string[]; // Always 2 example sentences
   level: DifficultyLevel;
   synonyms: string[];
   antonyms: string[];
@@ -48,39 +82,91 @@ Level classification guide:
 Return ONLY the JSON object. No markdown, no explanation, no backticks.
 `;
 
-  try {
-    const result = await model.generateContent(prompt);
+  const parsed = await withRetry(async () => {
+    const result = await getModel().generateContent(prompt);
     const text = result.response.text().trim();
     const cleaned = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(cleaned);
+    return JSON.parse(cleaned);
+  });
 
-    // Handle both old "sentence" (string) and new "sentences" (array) format
+  // Handle both old "sentence" (string) and new "sentences" (array) format
+  let sentences: string[] = [];
+  if (Array.isArray(parsed.sentences) && parsed.sentences.length > 0) {
+    sentences = parsed.sentences;
+  } else if (typeof parsed.sentence === 'string') {
+    sentences = [parsed.sentence];
+  }
+
+  // Ensure we always have exactly 2 sentences
+  if (sentences.length < 2) {
+    sentences.push(`Understanding ${word} broadens your vocabulary and helps you communicate with greater precision.`);
+  }
+
+  return {
+    word: parsed.word?.toLowerCase() || word.toLowerCase(),
+    meaning: parsed.meaning || '',
+    sentences: sentences.slice(0, 2), // cap at 2
+    level: normalizeDifficultyLevel(parsed.level || 'intermediate'),
+    synonyms: Array.isArray(parsed.synonyms) ? parsed.synonyms : [],
+    antonyms: Array.isArray(parsed.antonyms) ? parsed.antonyms : [],
+    etymology: parsed.etymology || '',
+    partOfSpeech: parsed.partOfSpeech || 'unknown',
+  };
+}
+
+export async function processWordsBatchWithAI(words: string[]): Promise<AIWordData[]> {
+  const prompt = `
+You are a vocabulary expert. Analyze the following English words: ${words.join(', ')}.
+Return a JSON array of objects, where each object has these exact fields:
+
+{
+  "word": "the word",
+  "meaning": "clear, concise definition in 1-2 sentences",
+  "sentences": ["first natural example sentence using the word", "second natural example sentence showing different context"],
+  "level": "ONE of: beginner | intermediate | advanced | expert",
+  "synonyms": ["up to 4 synonyms"],
+  "antonyms": ["up to 4 antonyms"],
+  "etymology": "brief origin/history of the word (1-2 sentences)",
+  "partOfSpeech": "noun | verb | adjective | adverb | etc."
+}
+
+Level classification guide:
+- beginner: everyday common words (hello, run, happy, food)
+- intermediate: moderately complex words most adults know (eloquent, persist, obscure)
+- advanced: sophisticated vocabulary for educated readers (ephemeral, laconic, solipsism)
+- expert: rare, highly academic, or technical words (sesquipedalian, vellichor, tmesis)
+
+Return ONLY the JSON array. No markdown, no explanation, no backticks.
+`;
+
+  const parsedArray = await withRetry(async () => {
+    const result = await getModel().generateContent(prompt);
+    const text = result.response.text().trim();
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(cleaned) as any[];
+  });
+
+  return parsedArray.map(parsed => {
     let sentences: string[] = [];
     if (Array.isArray(parsed.sentences) && parsed.sentences.length > 0) {
       sentences = parsed.sentences;
     } else if (typeof parsed.sentence === 'string') {
       sentences = [parsed.sentence];
     }
-
-    // Ensure we always have 2 sentences
-    if (sentences.length < 2) {
-      sentences.push(`The concept of ${word} is widely discussed in academic and everyday contexts.`);
-    }
+    if (sentences.length === 1) sentences.push(sentences[0]);
+    if (sentences.length === 0) sentences = ["Example sentence 1.", "Example sentence 2."];
 
     return {
-      word: parsed.word?.toLowerCase() || word.toLowerCase(),
+      word: parsed.word || '',
       meaning: parsed.meaning || '',
-      sentences,
-      level: normalizeDifficultyLevel(parsed.level || 'intermediate'),
+      sentences: sentences.slice(0, 2),
+      level: normalizeDifficultyLevel(parsed.level),
       synonyms: Array.isArray(parsed.synonyms) ? parsed.synonyms : [],
       antonyms: Array.isArray(parsed.antonyms) ? parsed.antonyms : [],
       etymology: parsed.etymology || '',
       partOfSpeech: parsed.partOfSpeech || 'unknown',
     };
-  } catch (error) {
-    console.error(`❌ AI failed for word "${word}":`, error);
-    throw new Error(`AI processing failed for word: ${word}`);
-  }
+  });
 }
 
 export interface QuizQuestion {
@@ -121,7 +207,7 @@ Rules:
 `;
 
   try {
-    const result = await model.generateContent(prompt);
+    const result = await getModel().generateContent(prompt);
     const text = result.response.text().trim();
     const cleaned = text.replace(/```json|```/g, '').trim();
     return JSON.parse(cleaned);

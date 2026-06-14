@@ -1,8 +1,14 @@
 import { Router, Request, Response } from 'express';
+import fs from 'fs';
+import wordListModule from 'word-list';
 import Word from '../models/Dictionary';
 import WordRequest from '../models/WordRequests';
 import UserProgress from '../models/UserProgress';
 import { DifficultyLevel } from '../models/Dictionary';
+
+const wordListPath = (wordListModule as any).default || wordListModule;
+const wordArray = fs.readFileSync(wordListPath as string, 'utf8').split('\n');
+const englishDictionary = new Set(wordArray);
 
 const router = Router();
 
@@ -29,6 +35,15 @@ router.get('/search', async (req: Request, res: Response) => {
       });
     }
 
+    // ── Offline Spelling Check ──
+    if (!englishDictionary.has(q)) {
+      return res.json({
+        found: false,
+        validSpelling: false,
+        message: `"${q}" does not appear to be spelled correctly.`,
+      });
+    }
+
     // Word not in dictionary → create or update word request
     if (userId) {
       const existingRequest = await WordRequest.findOne({ word: q });
@@ -52,6 +67,7 @@ router.get('/search', async (req: Request, res: Response) => {
 
     return res.json({
       found: false,
+      validSpelling: true,
       message: `"${q}" is not in our dictionary yet. We've queued it for processing. Check back after midnight!`,
     });
   } catch (error: any) {
@@ -192,6 +208,26 @@ router.get('/stats', async (_req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Stats error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ─── GET /api/word/requests ──────────────────────────────────────────────────
+// Fetch all requests submitted by the specific user
+router.get('/requests', async (req: Request, res: Response) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' });
+    }
+
+    const requests = await WordRequest.find({ requestedBy: userId })
+      .sort({ createdAt: -1 })
+      .limit(50); // Get recent 50 requests
+
+    res.json({ requests });
+  } catch (error: any) {
+    console.error('Failed to fetch requests:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

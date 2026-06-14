@@ -2,7 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster } from 'sonner';
-import { BookOpen, LayoutDashboard, Zap, LogOut, User as UserIcon } from 'lucide-react';
+import { BookOpen, LayoutDashboard, Zap, LogOut, User as UserIcon, BookMarked } from 'lucide-react';
+import { LEVEL_TEXT_COLORS } from './utils/colors';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import Dashboard from './pages/Dashboard';
 import Library from './pages/Library';
@@ -10,6 +11,7 @@ import Practice from './pages/Practice';
 import Quiz from './pages/Quiz';
 import WordDetail from './pages/WordDetail';
 import Landing from './pages/Landing';
+import YourWords from './pages/YourWords';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, logout } = useAuth();
@@ -19,6 +21,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Home', path: '/', icon: LayoutDashboard },
     { name: 'Library', path: '/library', icon: BookOpen },
     { name: 'Practice', path: '/practice', icon: Zap },
+    { name: 'Your Words', path: '/your-words', icon: BookMarked },
   ];
 
   return (
@@ -45,7 +48,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="hidden sm:flex items-center gap-3">
             <div className="text-right">
               <p className="text-xs font-bold truncate max-w-[150px]">{profile?.displayName}</p>
-              <p className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">{profile?.level} level</p>
+              <p className={`text-[10px] font-bold uppercase tracking-wider ${LEVEL_TEXT_COLORS[profile?.level || 'intermediate']}`}>
+                {profile?.level} level
+              </p>
             </div>
             <div className="w-10 h-10 rounded-full bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center text-brand-accent overflow-hidden">
               {profile?.photoURL ? (
@@ -139,6 +144,7 @@ export default function App() {
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/library" element={<PrivateRoute><Library /></PrivateRoute>} />
           <Route path="/practice" element={<PrivateRoute><Practice /></PrivateRoute>} />
+          <Route path="/your-words" element={<PrivateRoute><YourWords /></PrivateRoute>} />
           <Route path="/quiz" element={<PrivateRoute><Quiz /></PrivateRoute>} />
           <Route path="/word/:term" element={<PrivateRoute><WordDetail /></PrivateRoute>} />
         </Routes>

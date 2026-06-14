@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Volume2, Loader2, Send, Edit2, Trash2, Check, X, Clock } from 'lucide-react';
 import { searchWord, getSentences, saveSentence, editSentence, deleteSentence } from '../services/api';
+import { LEVEL_COLORS } from '../utils/colors';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -104,12 +105,7 @@ const WordDetail: React.FC = () => {
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
-        <span className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border ${
-          wordData.level === 'beginner' ? 'bg-green-50 border-green-200 text-green-700' :
-          wordData.level === 'intermediate' ? 'bg-blue-50 border-blue-200 text-blue-700' :
-          wordData.level === 'advanced' ? 'bg-amber-50 border-amber-200 text-amber-700' :
-          'bg-pink-50 border-pink-200 text-pink-700'
-        }`}>
+        <span className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border ${LEVEL_COLORS[wordData.level] || ''}`}>
           {wordData.level}
         </span>
       </header>
@@ -149,7 +145,7 @@ const WordDetail: React.FC = () => {
               <p className="technical-label">Synonyms</p>
               <div className="flex flex-wrap gap-2">
                 {wordData.synonyms.map((s: string) => (
-                  <Link key={s} to={`/word/${s}`} className="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-bold rounded-lg border border-green-200 hover:bg-green-100 transition-colors">{s}</Link>
+                  <Link key={s} to={`/word/${s}`} className={`px-3 py-1 text-[10px] font-bold rounded-lg border transition-colors ${LEVEL_COLORS[wordData.level] || 'bg-brand-bg text-brand-primary border-brand-border'}`}>{s}</Link>
                 ))}
               </div>
             </div>

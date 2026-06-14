@@ -77,10 +77,10 @@ const WordSchema = new Schema<IWord>(
   }
 );
 
-// Compound indexes for efficient queries
-WordSchema.index({ word: 1 }, { unique: true });
-WordSchema.index({ level: 1 });
-WordSchema.index({ level: 1, createdAt: -1 }); // level + recency
+// Compound index for efficient level + recency queries (e.g. Word of Day selection)
+// Note: The `word` unique index and `level` index are already declared in the schema
+// field definitions above — only the compound index needs to be here.
+WordSchema.index({ level: 1, createdAt: -1 });
 
 // Static helper: get all words at a specific difficulty level
 WordSchema.statics.getByLevel = function (level: DifficultyLevel) {

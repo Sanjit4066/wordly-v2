@@ -50,8 +50,8 @@ const WordRequestSchema = new Schema<IWordRequest>(
   }
 );
 
-WordRequestSchema.index({ status: 1 });
-WordRequestSchema.index({ word: 1 }, { unique: true });
+// Note: `word` unique index and `status` index are declared on the fields above.
+// No additional index declarations needed here.
 
 const WordRequest = mongoose.model<IWordRequest>('WordRequest', WordRequestSchema);
 export default WordRequest;

@@ -3,30 +3,57 @@ import { motion } from 'motion/react';
 import {
   Trophy, Flame, BookOpen, TrendingUp,
   Volume2, CheckCircle2, ArrowRight,
-  Loader2, RotateCcw, Send, Bell, Settings
+  Loader2, RotateCcw, Send, Bell, Settings,
+  Star, BookMarked
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { getDailyWord, getYesterdayWord, submitSelfMark, saveSentence, getSentences, getStreak, getMastery, getNotificationCount, markNotificationsRead, getNotifications } from '../services/api';
+import { LEVEL_COLORS } from '../utils/colors';
+import {
+  getDailyWord, getYesterdayWord, submitSelfMark, saveSentence,
+  getSentences, getStreak, getMastery, getNotificationCount,
+  markNotificationsRead, getNotifications, markMastery
+} from '../services/api';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
-// ── Daily quote — changes once per day, never mid-session ──────────────────
+// ── Daily quote — wide variety of inspiring categories ─────────────────────
 const QUOTES = [
+  // Learning & Growth
+  { text: "The beautiful thing about learning is that no one can take it away from you.", author: "B.B. King" },
+  { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi" },
+  { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" },
+  { text: "The more that you read, the more things you will know.", author: "Dr. Seuss" },
+  { text: "Education is not the filling of a pail, but the lighting of a fire.", author: "W.B. Yeats" },
+  { text: "The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice.", author: "Brian Herbert" },
+  { text: "Anyone who stops learning is old, whether at twenty or eighty.", author: "Henry Ford" },
+  // Practice & Consistency
+  { text: "Practice is the hardest part of learning, and training is the essence of transformation.", author: "Ann Voskamp" },
+  { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+  { text: "Small daily improvements over time lead to stunning results.", author: "Robin Sharma" },
+  { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+  { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+  { text: "Discipline is the bridge between goals and accomplishment.", author: "Jim Rohn" },
+  // Words & Language
   { text: "A word after a word after a word is power.", author: "Margaret Atwood" },
   { text: "The limits of my language mean the limits of my world.", author: "Ludwig Wittgenstein" },
-  { text: "One forgets words as one forgets names. One's vocabulary needs constant fertilizing.", author: "Evelyn Waugh" },
-  { text: "Words are, of course, the most powerful drug used by mankind.", author: "Rudyard Kipling" },
-  { text: "To learn a language is to have one more window from which to look at the world.", author: "Chinese Proverb" },
-  { text: "The difference between the right word and almost the right word is a great matter.", author: "Mark Twain" },
-  { text: "Language is the road map of a culture. It tells you where its people come from.", author: "Rita Mae Brown" },
   { text: "Words can inspire, and words can destroy. Choose yours well.", author: "Robin Sharma" },
   { text: "Every word was once a poem.", author: "Ralph Waldo Emerson" },
-  { text: "If you talk to a man in a language he understands, that goes to his head. If you talk in his language, that goes to his heart.", author: "Nelson Mandela" },
-  { text: "Kind words can be short and easy to speak, but their echoes are truly endless.", author: "Mother Teresa" },
-  { text: "A new word is like a fresh seed sown on the ground of the discussion.", author: "Ludwig Wittgenstein" },
-  { text: "Words are the voice of the heart.", author: "Confucius" },
-  { text: "Speak clearly, if you speak at all; carve every word before you let it fall.", author: "Oliver Wendell Holmes" },
-  { text: "Language is power, life and the instrument of culture.", author: "Angela Carter" },
+  { text: "The difference between the right word and almost the right word is a great matter.", author: "Mark Twain" },
+  // Curiosity & Wonder
+  { text: "Curiosity is the engine of achievement.", author: "Ken Robinson" },
+  { text: "The wisest mind has something yet to learn.", author: "George Santayana" },
+  { text: "Wonder is the beginning of wisdom.", author: "Socrates" },
+  { text: "Stay hungry, stay foolish.", author: "Steve Jobs" },
+  // Perseverance
+  { text: "Fall seven times, stand up eight.", author: "Japanese Proverb" },
+  { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+  { text: "Every master was once a disaster.", author: "T. Harv Eker" },
+  { text: "Mistakes are proof that you are trying.", author: "Jennifer Lim" },
+  // Inspiration
+  { text: "Your only limit is your mind.", author: "Anonymous" },
+  { text: "Dream big, start small, but most of all, start.", author: "Simon Sinek" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
 ];
 
 function getDailyQuote() {
@@ -37,10 +64,23 @@ function getDailyQuote() {
 const Dashboard: React.FC = () => {
   const { profile, updateDifficulty } = useAuth();
 
-  // Fix 1: Cache today's word so it never changes on tab switch
   const [todayWord, setTodayWord] = useState<any>(() => {
     const cached = sessionStorage.getItem('wordly_today_word');
-    return cached ? JSON.parse(cached) : null;
+    if (!cached) return null;
+    try {
+      const parsed = JSON.parse(cached);
+      // Invalidate cache if it has a placeholder or fewer than 2 real sentences
+      const sentences: string[] = Array.isArray(parsed.sentences) ? parsed.sentences : [];
+      const PLACEHOLDER = 'The word is commonly used to express this concept in everyday communication.';
+      const realSentences = sentences.filter((s: string) => s !== PLACEHOLDER && s.trim().length > 10);
+      if (realSentences.length < 2) {
+        sessionStorage.removeItem('wordly_today_word');
+        return null;
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
   });
   const [yesterdayWord, setYesterdayWord] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -55,17 +95,34 @@ const Dashboard: React.FC = () => {
   const [notifCount, setNotifCount] = useState(0);
   const [showNotifs, setShowNotifs] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
-  // Fix 3: level change UI
   const [showLevelMenu, setShowLevelMenu] = useState(false);
+  // For manually marking mastery
+  const [wordMastery, setWordMastery] = useState<string | null>(null);
+  const [markingMastery, setMarkingMastery] = useState(false);
 
   const dailyQuote = getDailyQuote();
   const initialized = useRef(false);
+  const levelMenuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Fix 1: Only load once per session — don't reload on tab switch
     if (initialized.current) return;
     initialized.current = true;
     loadDashboard();
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (levelMenuRef.current && !levelMenuRef.current.contains(e.target as Node)) {
+        setShowLevelMenu(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifs(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const loadDashboard = async () => {
@@ -86,19 +143,16 @@ const Dashboard: React.FC = () => {
         setYesterdayWord(yesterdayRes.word);
         setPhase('REVIEW');
 
-        // Still load today's word in background (for after review)
         if (!todayWord) {
           const todayRes = await getDailyWord();
           if (todayRes.found) {
             setTodayWord(todayRes.data);
-            // Cache it so it doesn't reload on tab switch
             sessionStorage.setItem('wordly_today_word', JSON.stringify(todayRes.data));
             const sentencesRes = await getSentences(todayRes.data.word);
             setSavedSentences(sentencesRes.sentences || []);
           }
         }
       } else if (todayWord) {
-        // Already cached — just load sentences
         setPhase('DISCOVERY');
         const sentencesRes = await getSentences(todayWord.word);
         setSavedSentences(sentencesRes.sentences || []);
@@ -107,7 +161,7 @@ const Dashboard: React.FC = () => {
         if (todayRes.found) {
           setTodayWord(todayRes.data);
           sessionStorage.setItem('wordly_today_word', JSON.stringify(todayRes.data));
-          const sentencesRes = await getSentences(todayRes.data.word);
+          const sentencesRes = await getSentences(todayWord.word);
           setSavedSentences(sentencesRes.sentences || []);
         }
         setPhase('DISCOVERY');
@@ -162,13 +216,28 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Fix 3: Level change — only on explicit user action
   const handleLevelChange = (level: 'beginner' | 'intermediate' | 'advanced' | 'expert') => {
     updateDifficulty(level);
-    setShowLevelMenu(false);
-    // Clear cached word so next load gives word at new level
+    setShowLevelMenu(false);   // ← close immediately
     sessionStorage.removeItem('wordly_today_word');
     toast.success(`Level changed to ${level}! Your next word will be at ${level} level.`);
+  };
+
+  const handleMarkMastery = async (level: 'mastered' | 'familiar') => {
+    if (!todayWord) return;
+    setMarkingMastery(true);
+    try {
+      await markMastery(todayWord.word, level);
+      setWordMastery(level);
+      // Refresh mastery counts
+      const masteryRes = await getMastery();
+      setMastery(masteryRes.mastery || {});
+      toast.success(level === 'mastered' ? '🏆 Marked as Mastered!' : '📖 Marked as Familiar!');
+    } catch (err) {
+      toast.error('Failed to update mastery.');
+    } finally {
+      setMarkingMastery(false);
+    }
   };
 
   const playAudio = (term: string) => {
@@ -187,17 +256,47 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  return (
-    <div className="space-y-16 pb-20">
+  const statsRow = (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {[
+        { label: 'Streak', value: `${streak} days`, icon: Flame, color: 'text-orange-500' },
+        { label: 'Mastered', value: mastery.mastered || 0, icon: Trophy, color: 'text-brand-accent' },
+        { label: 'Familiar', value: mastery.familiar || 0, icon: BookOpen, color: 'text-blue-500' },
+        { label: 'Practiced', value: mastery.practiced || 0, icon: TrendingUp, color: 'text-green-500' },
+      ].map((stat) => (
+        <div key={stat.label} className="card p-6 bg-white space-y-2">
+          <stat.icon className={`w-5 h-5 ${stat.color}`} />
+          <p className="text-2xl font-serif font-black italic">{stat.value}</p>
+          <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">{stat.label}</p>
+        </div>
+      ))}
+    </div>
+  );
 
-      {/* Fix 5: Daily motivational quote — topmost, changes once per day */}
-      <div className="flex items-start gap-4 py-4 border-b border-brand-border">
-        <div className="text-brand-accent text-3xl font-serif leading-none mt-1">"</div>
-        <div>
-          <p className="text-base font-serif italic text-brand-primary leading-relaxed">
+  return (
+    <div className="space-y-12 pb-20">
+
+      {/* ── Daily Quote — centered oval pill at the very top ─────────────────── */}
+      <div className="flex justify-center pt-2">
+        <div
+          className="relative max-w-2xl w-full px-10 py-6 rounded-[3rem] text-center"
+          style={{
+            background: 'linear-gradient(135deg, rgba(226,125,96,0.13) 0%, rgba(226,125,96,0.06) 60%, rgba(253,252,251,0.9) 100%)',
+            border: '1.5px solid rgba(226,125,96,0.25)',
+            boxShadow: '0 4px 32px rgba(226,125,96,0.10), inset 0 1px 0 rgba(255,255,255,0.8)',
+          }}
+        >
+          {/* decorative big quote mark */}
+          <span
+            className="absolute -top-4 left-1/2 -translate-x-1/2 text-5xl font-serif leading-none select-none"
+            style={{ color: 'rgba(226,125,96,0.35)' }}
+          >
+            "
+          </span>
+          <p className="text-base md:text-lg font-serif italic text-brand-primary leading-relaxed mt-2">
             {dailyQuote.text}
           </p>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted mt-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-accent mt-3">
             — {dailyQuote.author}
           </p>
         </div>
@@ -207,7 +306,7 @@ const Dashboard: React.FC = () => {
       <header className="flex flex-col md:flex-row md:items-start justify-between gap-8">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-1.5 h-1.5 bg-brand-accent rounded-full"></div>
+            <div className="w-1.5 h-1.5 bg-brand-accent rounded-full" />
             <span className="technical-label">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
           </div>
           <h2 className="text-5xl md:text-6xl font-serif font-black italic tracking-tight leading-tight">
@@ -218,7 +317,7 @@ const Dashboard: React.FC = () => {
 
         <div className="flex items-center gap-3">
           {/* Notification Bell */}
-          <div className="relative">
+          <div className="relative" ref={notifRef}>
             <button onClick={handleShowNotifs} className="flex items-center gap-2 px-4 py-2 bg-white border border-brand-border rounded-2xl text-brand-muted hover:text-brand-primary transition-all">
               <Bell className="w-4 h-4" />
               {notifCount > 0 && (
@@ -236,11 +335,11 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Fix 3: Level selector — explicit button, not auto-changing */}
-          <div className="relative">
+          {/* Level selector */}
+          <div className="relative" ref={levelMenuRef}>
             <button
               onClick={() => setShowLevelMenu(!showLevelMenu)}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-brand-border rounded-2xl text-brand-muted hover:text-brand-primary transition-all"
+              className={`flex items-center gap-2 px-4 py-2 bg-white border rounded-2xl transition-all ${LEVEL_COLORS[profile?.level || 'intermediate']}`}
             >
               <Settings className="w-4 h-4" />
               <span className="text-[10px] font-bold uppercase tracking-widest">{profile?.level}</span>
@@ -263,27 +362,11 @@ const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Streak', value: `${streak} days`, icon: Flame, color: 'text-orange-500' },
-          { label: 'Mastered', value: mastery.mastered || 0, icon: Trophy, color: 'text-brand-accent' },
-          { label: 'Familiar', value: mastery.familiar || 0, icon: BookOpen, color: 'text-blue-500' },
-          { label: 'Practiced', value: mastery.practiced || 0, icon: TrendingUp, color: 'text-green-500' },
-        ].map((stat) => (
-          <div key={stat.label} className="card p-6 bg-white space-y-2">
-            <stat.icon className={`w-5 h-5 ${stat.color}`} />
-            <p className="text-2xl font-serif font-black italic">{stat.value}</p>
-            <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">{stat.label}</p>
-          </div>
-        ))}
-      </div>
-
       {/* REVIEW PHASE */}
       {phase === 'REVIEW' && yesterdayWord && (
         <section className="space-y-10 animate-in fade-in duration-700">
           <div className="flex items-center gap-3">
-            <div className="w-1.5 h-1.5 bg-brand-accent rounded-full animate-pulse"></div>
+            <div className="w-1.5 h-1.5 bg-brand-accent rounded-full animate-pulse" />
             <h4 className="technical-label">Morning Recall — Yesterday's Word</h4>
           </div>
 
@@ -295,8 +378,8 @@ const Dashboard: React.FC = () => {
               </h3>
               <div className="flex items-center justify-center gap-4 text-brand-muted">
                 <span className="text-sm font-serif italic">{yesterdayWord.partOfSpeech}</span>
-                <span className="w-1 h-1 bg-brand-border rounded-full"></span>
-                <span className="text-[10px] font-bold uppercase tracking-widest">{yesterdayWord.level}</span>
+                <span className="w-1 h-1 bg-brand-border rounded-full" />
+                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest ${LEVEL_COLORS[yesterdayWord.level]}`}>{yesterdayWord.level}</span>
               </div>
             </div>
 
@@ -325,7 +408,11 @@ const Dashboard: React.FC = () => {
             <div className="border-t border-brand-border pt-8 space-y-4">
               <p className="technical-label">Definition</p>
               <p className="text-xl font-serif italic text-brand-muted">{yesterdayWord.meaning}</p>
-              {(yesterdayWord.sentences?.length ? yesterdayWord.sentences : [yesterdayWord.sentence]).map((s: string, i: number) => (
+              {/* Show up to 2 example sentences */}
+              {(yesterdayWord.sentences?.length
+                ? yesterdayWord.sentences.slice(0, 2)
+                : yesterdayWord.sentence ? [yesterdayWord.sentence] : []
+              ).map((s: string, i: number) => (
                 <p key={i} className="text-sm text-brand-primary font-medium">"{s}"</p>
               ))}
             </div>
@@ -353,12 +440,14 @@ const Dashboard: React.FC = () => {
                       <Volume2 className="w-4 h-4" />
                       <span>Hear it</span>
                     </button>
-                    <span className="w-1.5 h-1.5 bg-brand-border rounded-full"></span>
+                    <span className="w-1.5 h-1.5 bg-brand-border rounded-full" />
                     <span>{todayWord.partOfSpeech}</span>
                   </div>
                 </div>
-                <div className="px-4 py-2 bg-brand-bg rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] text-brand-muted border border-brand-border">
-                  {todayWord.level} level
+                <div className="pt-6">
+                  <span className={`px-4 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-widest ${LEVEL_COLORS[todayWord.level]}`}>
+                    {todayWord.level} level
+                  </span>
                 </div>
               </div>
 
@@ -367,8 +456,16 @@ const Dashboard: React.FC = () => {
                   {todayWord.meaning}
                 </p>
 
+                {/* Example sentences — show up to 2 */}
                 <div className="space-y-3">
-                  {(todayWord.sentences?.length ? todayWord.sentences : [todayWord.sentence]).map((s: string, i: number) => (
+                  {(todayWord.sentences?.length >= 2
+                    ? todayWord.sentences.slice(0, 2)
+                    : todayWord.sentences?.length === 1
+                    ? [todayWord.sentences[0], todayWord.sentence].filter(Boolean)
+                    : todayWord.sentence
+                    ? [todayWord.sentence]
+                    : []
+                  ).map((s: string, i: number) => (
                     <div key={i} className="pl-6 border-l-4 border-brand-accent bg-brand-accent/5 py-5 pr-6 rounded-r-2xl text-xl text-brand-primary font-serif leading-relaxed shadow-sm">
                       "{s}"
                     </div>
@@ -383,7 +480,7 @@ const Dashboard: React.FC = () => {
                         <p className="technical-label">Synonyms</p>
                         <div className="flex flex-wrap gap-2">
                           {todayWord.synonyms.map((s: string) => (
-                            <Link key={s} to={`/word/${s}`} className="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-bold rounded-lg border border-green-200 hover:bg-green-100 transition-colors">{s}</Link>
+                            <Link key={s} to={`/word/${s}`} className={`px-3 py-1 text-[10px] font-bold rounded-lg border transition-colors ${LEVEL_COLORS[todayWord.level] || 'bg-brand-bg text-brand-primary border-brand-border'}`}>{s}</Link>
                           ))}
                         </div>
                       </div>
@@ -409,7 +506,7 @@ const Dashboard: React.FC = () => {
                   </div>
                 )}
 
-                {/* Fix 2: Write Your Own Sentence + saved sentences clearly visible */}
+                {/* Write Your Own Sentence */}
                 <div className="pt-6 border-t border-brand-border space-y-6">
                   <h4 className="technical-label">Write Your Own Sentence</h4>
                   <div className="relative user-input-area p-2 rounded-3xl">
@@ -428,7 +525,7 @@ const Dashboard: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Fix 2: Always show saved sentences with count */}
+                  {/* Saved sentences */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <p className="technical-label">Your Sentences ({savedSentences.length})</p>
@@ -459,8 +556,44 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </motion.div>
+
+          {/* ── Mark as Mastered / Familiar ─────────────────────────────────── */}
+          <div className="card p-8 bg-white space-y-5">
+            <div className="flex items-center gap-3">
+              <Star className="w-4 h-4 text-brand-accent" />
+              <h4 className="technical-label">Mark Your Progress</h4>
+            </div>
+            <p className="text-sm font-serif italic text-brand-muted">
+              How well do you know <span className="font-bold not-italic text-brand-primary">{todayWord.word}</span>?
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => handleMarkMastery('mastered')}
+                disabled={markingMastery || wordMastery === 'mastered'}
+                className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-bold text-sm transition-all ${wordMastery === 'mastered' ? 'bg-brand-accent text-white shadow-lg' : 'bg-brand-accent/10 text-brand-accent border border-brand-accent/30 hover:bg-brand-accent hover:text-white'} disabled:opacity-60`}
+              >
+                <Trophy className="w-4 h-4" />
+                {wordMastery === 'mastered' ? 'Mastered ✓' : 'Mark as Mastered'}
+              </button>
+              <button
+                onClick={() => handleMarkMastery('familiar')}
+                disabled={markingMastery || wordMastery === 'familiar'}
+                className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-bold text-sm transition-all ${wordMastery === 'familiar' ? 'bg-blue-500 text-white shadow-lg' : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-500 hover:text-white'} disabled:opacity-60`}
+              >
+                <BookMarked className="w-4 h-4" />
+                {wordMastery === 'familiar' ? 'Familiar ✓' : 'Mark as Familiar'}
+              </button>
+            </div>
+          </div>
+
+          {/* ── Stats Row — at the bottom ────────────────────────────────────── */}
+          {statsRow}
+
         </section>
       )}
+
+      {/* Stats if not in discovery phase yet */}
+      {phase !== 'DISCOVERY' && statsRow}
 
       {phase === 'DISCOVERY' && !todayWord && !loading && (
         <div className="card p-16 text-center space-y-6 bg-white">
@@ -470,7 +603,7 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Fix 4: Profile picture at the bottom */}
+      {/* Profile footer */}
       {profile?.photoURL && (
         <div className="flex items-center gap-4 pt-8 border-t border-brand-border mt-8">
           <img src={profile.photoURL} alt={profile.displayName} className="w-12 h-12 rounded-full border-2 border-brand-border" />

@@ -45,6 +45,11 @@ export async function getDictionaryStats() {
   return res.json();
 }
 
+export async function getUserRequests() {
+  const res = await fetch(`${BASE}/word/requests`, { headers: headers() });
+  return res.json();
+}
+
 // ─── REVISION ────────────────────────────────────────────────────────────────
 
 export async function getYesterdayWord() {
@@ -149,5 +154,19 @@ export async function getStreak() {
 
 export async function getMastery() {
   const res = await fetch(`${BASE}/progress/mastery`, { headers: headers() });
+  return res.json();
+}
+
+export async function markMastery(wordId: string, masteryLevel: 'seen' | 'practiced' | 'familiar' | 'mastered') {
+  const res = await fetch(`${BASE}/progress/mark`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify({ wordId, masteryLevel }),
+  });
+  return res.json();
+}
+
+export async function getUserWords() {
+  const res = await fetch(`${BASE}/sentences/user/all`, { headers: headers() });
   return res.json();
 }

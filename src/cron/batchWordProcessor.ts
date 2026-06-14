@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import WordRequest from '../models/WordRequests';
 import Word from '../models/Dictionary';
 import Notification from '../models/Notifications';
-import { processWordWithAI } from '../services/geminiService';
+import { processWordWithAI, processWordsBatchWithAI } from '../services/geminiService';
 import { DifficultyLevel } from '../models/Dictionary';
 
 // ─── DIFFICULTY BUCKET SUMMARY ────────────────────────────────────────────────
@@ -41,14 +41,17 @@ async function processPendingWords(): Promise<void> {
 
   const results: BatchResult[] = [];
 
-  for (const request of pendingRequests) {
-    const { word, requestedBy } = request;
+  const CHUNK_SIZE = 30;
 
-    try {
-      // Mark as processing to prevent duplicate runs
+  for (let i = 0; i < pendingRequests.length; i += CHUNK_SIZE) {
+    const chunkRequests = pendingRequests.slice(i, i + CHUNK_SIZE);
+    const chunkWordsToProcess: { word: string; req: any }[] = [];
+
+    // Pre-check for already existing words
+    for (const request of chunkRequests) {
+      const { word, requestedBy } = request;
       await WordRequest.findByIdAndUpdate(request._id, { status: 'processing' });
 
-      // Check if word was already added by a concurrent run
       const existingWord = await Word.findOne({ word });
       if (existingWord) {
         console.log(`⚠️  [Batch Processor] "${word}" already in dictionary at level: ${existingWord.level}`);
@@ -57,61 +60,70 @@ async function processPendingWords(): Promise<void> {
           processedAt: new Date(),
         });
         results.push({ word, level: existingWord.level, status: 'already_exists' });
-
-        // Still notify users even if word pre-existed
         await notifyUsers(requestedBy, word, existingWord.level);
-        continue;
+      } else {
+        chunkWordsToProcess.push({ word, req: request });
       }
-
-      // ── CORE: Call Gemini AI for word data + difficulty classification ──
-      console.log(`🤖 [Batch Processor] Calling AI for "${word}"...`);
-      const aiData = await processWordWithAI(word);
-
-      // ── Save word to dictionary under its AI-assigned difficulty level ──
-      const savedWord = await Word.create({
-        word: aiData.word,
-        meaning: aiData.meaning,
-        sentences: aiData.sentences,
-        level: aiData.level,           // ← difficulty bucket assignment
-        synonyms: aiData.synonyms,
-        antonyms: aiData.antonyms,
-        etymology: aiData.etymology,
-        partOfSpeech: aiData.partOfSpeech,
-        addedVia: 'ai_batch',
-      });
-
-      console.log(`✅ [Batch Processor] "${word}" saved → level: "${savedWord.level}"`);
-
-      // Mark request as done
-      await WordRequest.findByIdAndUpdate(request._id, {
-        status: 'done',
-        processedAt: new Date(),
-      });
-
-      results.push({ word, level: savedWord.level, status: 'saved' });
-
-      // Notify all users who requested this word
-      await notifyUsers(requestedBy, word, savedWord.level);
-
-    } catch (error: any) {
-      console.error(`❌ [Batch Processor] Failed for "${word}":`, error.message);
-
-      // Mark request as failed with reason
-      await WordRequest.findByIdAndUpdate(request._id, {
-        status: 'failed',
-        failReason: error.message || 'Unknown AI error',
-      });
-
-      results.push({
-        word,
-        level: 'intermediate', // fallback, won't be used since it failed
-        status: 'failed',
-        failReason: error.message,
-      });
     }
 
-    // Small delay between AI calls to respect rate limits
-    await new Promise((res) => setTimeout(res, 500));
+    if (chunkWordsToProcess.length === 0) continue;
+
+    const wordsOnly = chunkWordsToProcess.map((w) => w.word);
+
+    try {
+      console.log(`🤖 [Batch Processor] Calling AI for ${wordsOnly.length} word(s) simultaneously...`);
+      const aiDataArray = await processWordsBatchWithAI(wordsOnly);
+
+      for (const reqWrapper of chunkWordsToProcess) {
+        const { word, req } = reqWrapper;
+        const aiData = aiDataArray.find((a) => a.word.toLowerCase() === word.toLowerCase());
+
+        if (!aiData) {
+           throw new Error(`AI did not return data for word: ${word}`);
+        }
+
+        const savedWord = await Word.create({
+          word: aiData.word.toLowerCase(),
+          meaning: aiData.meaning,
+          sentences: aiData.sentences,
+          level: aiData.level,
+          synonyms: aiData.synonyms,
+          antonyms: aiData.antonyms,
+          etymology: aiData.etymology,
+          partOfSpeech: aiData.partOfSpeech,
+          addedVia: 'ai_batch',
+        });
+
+        console.log(`✅ [Batch Processor] "${word}" saved → level: "${savedWord.level}"`);
+
+        await WordRequest.findByIdAndUpdate(req._id, {
+          status: 'done',
+          processedAt: new Date(),
+        });
+
+        results.push({ word, level: savedWord.level, status: 'saved' });
+        await notifyUsers(req.requestedBy, word, savedWord.level);
+      }
+    } catch (error: any) {
+      console.error(`❌ [Batch Processor] Failed chunk starting with "${wordsOnly[0]}":`, error.message);
+
+      for (const reqWrapper of chunkWordsToProcess) {
+        const { word, req } = reqWrapper;
+        await WordRequest.findByIdAndUpdate(req._id, {
+          status: 'failed',
+          failReason: error.message || 'Unknown AI error in batch',
+        });
+
+        results.push({
+          word,
+          level: 'intermediate',
+          status: 'failed',
+          failReason: error.message,
+        });
+      }
+    }
+
+    await new Promise((res) => setTimeout(res, 2000));
   }
 
   // ── Print batch summary with difficulty breakdown ──

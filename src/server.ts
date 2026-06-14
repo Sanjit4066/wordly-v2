@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+
+// Load env vars before anything else!
+dotenv.config();
 import connectMongoDB from './lib/mongodb';
 
 // Routes
@@ -16,9 +19,9 @@ import adminRoutes from './routes/adminRoutes';
 import { startBatchWordProcessor } from './cron/batchWordProcessor';
 import { startQuizGenerator } from './cron/quizGenerator';
 import { startSpacedRepetitionReminder } from './cron/spacedRepetitionReminder';
+import { startDailyDictionaryExpander } from './cron/dailyDictionaryExpander';
 
-dotenv.config();
-
+// (dotenv.config() moved to top of file)
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -57,9 +60,10 @@ async function bootstrap() {
     });
 
     // Start all cron jobs
-    startBatchWordProcessor();       // 11:55 PM daily — batch word processing + difficulty categorization
-    startQuizGenerator();             // 11:00 PM every Monday — weekly quiz generation
-    startSpacedRepetitionReminder(); // 9:00 AM daily — spaced repetition reminders
+    startBatchWordProcessor();           // 11:55 PM daily  — user-requested word batch processing
+    startQuizGenerator();                // 11:00 PM Monday — weekly quiz generation
+    startSpacedRepetitionReminder();     //  9:00 AM daily  — spaced repetition reminders
+    startDailyDictionaryExpander();      //  5:00 AM EST    — autonomous 1000-word dictionary expansion
 
     console.log('✅ All cron jobs scheduled\n');
   } catch (error) {

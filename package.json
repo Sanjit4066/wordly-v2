@@ -8,7 +8,9 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "ts-node src/scripts/seedDictionary.ts",
-    "seed:bulk": "ts-node src/scripts/bulkSeed.ts"
+    "seed:bulk": "ts-node src/scripts/bulkSeed.ts",
+    "patch:sentences": "ts-node src/scripts/patchSentences.ts",
+    "fix:sentences": "ts-node src/scripts/fixSentences.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
@@ -17,7 +19,8 @@
     "express": "^4.19.2",
     "firebase-admin": "^12.1.0",
     "mongoose": "^8.4.0",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "word-list": "^4.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

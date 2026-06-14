@@ -130,7 +130,7 @@ async function generateWordData(word: string, level: DifficultyLevel): Promise<a
 {
   "word": "${word}",
   "meaning": "clear definition in 1-2 sentences",
-  "sentence": "one natural example sentence using the word",
+  "sentences": ["first natural example sentence using the word in context", "second natural example sentence showing a different context or usage"],
   "level": "${level}",
   "synonyms": ["2-3 synonyms"],
   "antonyms": ["1-2 antonyms"],
@@ -140,7 +140,22 @@ async function generateWordData(word: string, level: DifficultyLevel): Promise<a
 
   const result = await model.generateContent(prompt);
   const text = result.response.text().trim().replace(/```json|```/g, '').trim();
-  return JSON.parse(text);
+  const parsed = JSON.parse(text);
+
+  // Normalise: handle both old "sentence" (string) and new "sentences" (array)
+  let sentences: string[] = [];
+  if (Array.isArray(parsed.sentences) && parsed.sentences.length > 0) {
+    sentences = parsed.sentences;
+  } else if (typeof parsed.sentence === 'string' && parsed.sentence) {
+    sentences = [parsed.sentence];
+  }
+
+  // Always ensure 2 sentences
+  if (sentences.length < 2) {
+    sentences.push(`Understanding ${word} helps expand your vocabulary and express ideas more precisely.`);
+  }
+
+  return { ...parsed, sentences };
 }
 
 async function bulkSeed() {
