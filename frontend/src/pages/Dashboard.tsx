@@ -84,6 +84,7 @@ const Dashboard: React.FC = () => {
   });
   const [yesterdayWord, setYesterdayWord] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [wakingUp, setWakingUp] = useState(false);
   const [phase, setPhase] = useState<'CHECKING' | 'REVIEW' | 'DISCOVERY'>('CHECKING');
   const [selfMark, setSelfMark] = useState<'got_it' | 'needs_practice' | null>(null);
   const [markLoading, setMarkLoading] = useState(false);
@@ -125,7 +126,7 @@ const Dashboard: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const loadDashboard = async () => {
+  const loadDashboard = async (attempt = 1) => {
     setLoading(true);
     try {
       const [yesterdayRes, streakRes, masteryRes, notifRes] = await Promise.all([
@@ -135,6 +136,7 @@ const Dashboard: React.FC = () => {
         getNotificationCount(),
       ]);
 
+      setWakingUp(false);
       setStreak(streakRes.streak || 0);
       setMastery(masteryRes.mastery || {});
       setNotifCount(notifRes.count || 0);
@@ -167,9 +169,19 @@ const Dashboard: React.FC = () => {
         setPhase('DISCOVERY');
       }
     } catch (err) {
-      toast.error('Failed to load dashboard. Is the backend running?');
+      // Render free tier cold start — retry up to 3 times
+      const delays = [3000, 8000, 15000];
+      if (attempt <= 3) {
+        setWakingUp(true);
+        setTimeout(() => loadDashboard(attempt + 1), delays[attempt - 1]);
+        return;
+      }
+      setWakingUp(false);
+      toast.error('Backend is unavailable. Please try refreshing.');
     } finally {
-      setLoading(false);
+      if (attempt > 3) setLoading(false);
+      else if (attempt === 1) { /* keep loading spinner while waking up */ }
+      else setLoading(false);
     }
   };
 
@@ -248,10 +260,16 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-8 animate-pulse">
-        <div className="h-6 w-64 bg-black/5 rounded" />
-        <div className="h-10 w-96 bg-black/5 rounded" />
-        <div className="h-64 bg-white rounded-3xl" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+        <Loader2 className="w-10 h-10 text-brand-accent animate-spin" />
+        {wakingUp ? (
+          <div className="text-center space-y-2">
+            <p className="text-lg font-serif italic text-brand-primary">Waking up the backend...</p>
+            <p className="text-sm text-brand-muted">Free tier servers sleep after inactivity.<br />This takes up to 50 seconds on first load.</p>
+          </div>
+        ) : (
+          <p className="text-sm font-serif italic text-brand-muted">Loading your dashboard...</p>
+        )}
       </div>
     );
   }
