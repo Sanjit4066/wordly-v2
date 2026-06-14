@@ -11,9 +11,12 @@
 ## Screenshots
 
 <div align="center">
-  <img src="./docs/dashboard.png" alt="Wordly Dashboard View" width="45%" />
+  <img src=<img width="3166" height="1820" alt="Dashboard img" src="https://github.com/user-attachments/assets/3ace2193-3dda-4b17-b1db-409961f79d19" />
+
+ />
   &nbsp;
-  <img src="./docs/practice.png" alt="Wordly Practice View" width="45%" />
+  <img src=<img width="3164" height="1824" alt="Practise" src="https://github.com/user-attachments/assets/d2b8167e-bb36-42ce-a6f1-4af5fa782195" />
+/>
   <p><em>(Please save the images you just uploaded as <code>dashboard.png</code> and <code>practice.png</code> inside a <code>docs/</code> folder in this repo!)</em></p>
 </div>
 
