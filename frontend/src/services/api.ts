@@ -124,6 +124,15 @@ export async function markNotificationsRead() {
   return res.json();
 }
 
+export async function sendWelcomeNotification(displayName: string) {
+  const res = await fetch(`${BASE}/notifications/welcome`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify({ displayName }),
+  });
+  return res.json();
+}
+
 // ─── QUIZ ────────────────────────────────────────────────────────────────────
 
 export async function getCurrentQuiz() {

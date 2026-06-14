@@ -7,7 +7,7 @@ import {
   signOut
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { getUserLevel, setUserLevel } from '../services/api';
+import { getUserLevel, setUserLevel, sendWelcomeNotification } from '../services/api';
 
 export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 
@@ -51,6 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           streak: 0,
           wordsLearned: 0,
         });
+        
+        // Ensure user gets a welcome notification permanently
+        sendWelcomeNotification(firebaseUser.displayName || 'Learner').catch(err => console.error("Welcome err:", err));
       } else {
         setProfile(null);
         localStorage.removeItem('wordly_user_id');
