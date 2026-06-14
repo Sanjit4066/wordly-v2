@@ -182,7 +182,7 @@ async function bulkSeed() {
         await Word.create({
           word: data.word?.toLowerCase() || word,
           meaning: data.meaning || '',
-          sentence: data.sentence || '',
+          sentences: Array.isArray(data.sentences) ? data.sentences : [data.sentence || ""],
           level,
           synonyms: Array.isArray(data.synonyms) ? data.synonyms : [],
           antonyms: Array.isArray(data.antonyms) ? data.antonyms : [],

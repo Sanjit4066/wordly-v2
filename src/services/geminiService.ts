@@ -4,22 +4,19 @@ import { DifficultyLevel } from '../models/Dictionary';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-// ─── DIFFICULTY LEVEL CLASSIFICATION ─────────────────────────────────────────
-// Maps AI-returned levels to our standard 4-tier system
-// ─────────────────────────────────────────────────────────────────────────────
 function normalizeDifficultyLevel(raw: string): DifficultyLevel {
   const cleaned = raw.toLowerCase().trim();
   if (['beginner', 'basic', 'elementary', 'easy', 'a1', 'a2'].includes(cleaned)) return 'beginner';
   if (['intermediate', 'medium', 'moderate', 'b1', 'b2'].includes(cleaned)) return 'intermediate';
   if (['advanced', 'hard', 'difficult', 'c1'].includes(cleaned)) return 'advanced';
   if (['expert', 'proficient', 'very hard', 'academic', 'rare', 'c2'].includes(cleaned)) return 'expert';
-  return 'intermediate'; // safe default
+  return 'intermediate';
 }
 
 export interface AIWordData {
   word: string;
   meaning: string;
-  sentence: string;
+  sentences: string[]; // Now 2 example sentences
   level: DifficultyLevel;
   synonyms: string[];
   antonyms: string[];
@@ -27,15 +24,6 @@ export interface AIWordData {
   partOfSpeech: string;
 }
 
-// ─── BATCH WORD PROCESSOR ─────────────────────────────────────────────────────
-// Called once per unknown word during the 11:55 PM cron job.
-// Returns full word data INCLUDING a difficulty level classification.
-// The level field determines which difficulty bucket the word lands in:
-//   beginner   → common words users can learn on day 1
-//   intermediate → words for users with basic vocabulary
-//   advanced   → words users see when they select "advanced" mode
-//   expert     → rare/academic words for power users
-// ─────────────────────────────────────────────────────────────────────────────
 export async function processWordWithAI(word: string): Promise<AIWordData> {
   const prompt = `
 You are a vocabulary expert. Analyze the English word "${word}" and return a JSON object with these exact fields:
@@ -43,7 +31,7 @@ You are a vocabulary expert. Analyze the English word "${word}" and return a JSO
 {
   "word": "${word}",
   "meaning": "clear, concise definition in 1-2 sentences",
-  "sentence": "one natural example sentence using the word",
+  "sentences": ["first natural example sentence using the word", "second natural example sentence showing different context"],
   "level": "ONE of: beginner | intermediate | advanced | expert",
   "synonyms": ["up to 4 synonyms"],
   "antonyms": ["up to 4 antonyms"],
@@ -63,15 +51,26 @@ Return ONLY the JSON object. No markdown, no explanation, no backticks.
   try {
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
-
-    // Strip any accidental markdown fences
     const cleaned = text.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(cleaned);
+
+    // Handle both old "sentence" (string) and new "sentences" (array) format
+    let sentences: string[] = [];
+    if (Array.isArray(parsed.sentences) && parsed.sentences.length > 0) {
+      sentences = parsed.sentences;
+    } else if (typeof parsed.sentence === 'string') {
+      sentences = [parsed.sentence];
+    }
+
+    // Ensure we always have 2 sentences
+    if (sentences.length < 2) {
+      sentences.push(`The concept of ${word} is widely discussed in academic and everyday contexts.`);
+    }
 
     return {
       word: parsed.word?.toLowerCase() || word.toLowerCase(),
       meaning: parsed.meaning || '',
-      sentence: parsed.sentence || '',
+      sentences,
       level: normalizeDifficultyLevel(parsed.level || 'intermediate'),
       synonyms: Array.isArray(parsed.synonyms) ? parsed.synonyms : [],
       antonyms: Array.isArray(parsed.antonyms) ? parsed.antonyms : [],
@@ -84,10 +83,6 @@ Return ONLY the JSON object. No markdown, no explanation, no backticks.
   }
 }
 
-// ─── WEEKLY QUIZ GENERATOR ─────────────────────────────────────────────────────
-// Called once per user every Monday at 11 PM.
-// Pre-generates MCQ questions stored in weekly_quizzes — zero AI at quiz time.
-// ─────────────────────────────────────────────────────────────────────────────
 export interface QuizQuestion {
   wordId: string;
   question: string;
@@ -100,9 +95,7 @@ export async function generateWeeklyQuiz(
 ): Promise<QuizQuestion[]> {
   if (words.length === 0) return [];
 
-  const wordList = words
-    .map((w) => `- "${w.word}": ${w.meaning}`)
-    .join('\n');
+  const wordList = words.map((w) => `- "${w.word}": ${w.meaning}`).join('\n');
 
   const prompt = `
 You are a vocabulary quiz creator. Generate one multiple-choice question for each word below.
@@ -131,8 +124,7 @@ Rules:
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
     const cleaned = text.replace(/```json|```/g, '').trim();
-    const parsed: QuizQuestion[] = JSON.parse(cleaned);
-    return parsed;
+    return JSON.parse(cleaned);
   } catch (error) {
     console.error('❌ Quiz generation failed:', error);
     throw new Error('Failed to generate weekly quiz');

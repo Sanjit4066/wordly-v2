@@ -7,55 +7,55 @@ import Word from '../models/Dictionary';
 const seedWords = [
   // ─── BEGINNER ─────────────────────────────────────────────────────────────
   {
-    word: 'happy', meaning: 'Feeling or showing pleasure or contentment.', sentence: 'She was happy to see her old friend.', level: 'beginner', synonyms: ['joyful', 'cheerful', 'pleased', 'content'], antonyms: ['sad', 'unhappy', 'miserable'], etymology: 'From Old Norse "happ" meaning luck or chance.', partOfSpeech: 'adjective', addedVia: 'manual',
+    word: 'happy', meaning: 'Feeling or showing pleasure or contentment.', sentences: ['She was happy to see her old friend.', 'The word is commonly used to express this concept in everyday communication.'], level: 'beginner', synonyms: ['joyful', 'cheerful', 'pleased', 'content'], antonyms: ['sad', 'unhappy', 'miserable'], etymology: 'From Old Norse "happ" meaning luck or chance.', partOfSpeech: 'adjective', addedVia: 'manual',
   },
   {
-    word: 'brave', meaning: 'Ready to face and endure danger or pain without showing fear.', sentence: 'The brave firefighter ran into the burning building.', level: 'beginner', synonyms: ['courageous', 'bold', 'fearless'], antonyms: ['cowardly', 'timid'], etymology: 'From Latin "barbarus" meaning wild or fierce.', partOfSpeech: 'adjective', addedVia: 'manual',
+    word: 'brave', meaning: 'Ready to face and endure danger or pain without showing fear.', sentences: ['The brave firefighter ran into the burning building.', 'The word is commonly used to express this concept in everyday communication.'], level: 'beginner', synonyms: ['courageous', 'bold', 'fearless'], antonyms: ['cowardly', 'timid'], etymology: 'From Latin "barbarus" meaning wild or fierce.', partOfSpeech: 'adjective', addedVia: 'manual',
   },
   {
-    word: 'calm', meaning: 'Not showing or feeling nervousness, anger, or other strong emotions.', sentence: 'He remained calm during the crisis.', level: 'beginner', synonyms: ['serene', 'peaceful', 'tranquil'], antonyms: ['agitated', 'anxious', 'turbulent'], etymology: 'From Greek "kauma" meaning heat of the day, when everything is still.', partOfSpeech: 'adjective', addedVia: 'manual',
+    word: 'calm', meaning: 'Not showing or feeling nervousness, anger, or other strong emotions.', sentences: ['He remained calm during the crisis.', 'The word is commonly used to express this concept in everyday communication.'], level: 'beginner', synonyms: ['serene', 'peaceful', 'tranquil'], antonyms: ['agitated', 'anxious', 'turbulent'], etymology: 'From Greek "kauma" meaning heat of the day, when everything is still.', partOfSpeech: 'adjective', addedVia: 'manual',
   },
   {
-    word: 'curious', meaning: 'Eager to know or learn something.', sentence: 'The curious child asked many questions.', level: 'beginner', synonyms: ['inquisitive', 'interested', 'nosy'], antonyms: ['indifferent', 'uninterested'], etymology: 'From Latin "curiosus" meaning careful, diligent, curious.', partOfSpeech: 'adjective', addedVia: 'manual',
+    word: 'curious', meaning: 'Eager to know or learn something.', sentences: ['The curious child asked many questions.', 'The word is commonly used to express this concept in everyday communication.'], level: 'beginner', synonyms: ['inquisitive', 'interested', 'nosy'], antonyms: ['indifferent', 'uninterested'], etymology: 'From Latin "curiosus" meaning careful, diligent, curious.', partOfSpeech: 'adjective', addedVia: 'manual',
   },
 
   // ─── INTERMEDIATE ─────────────────────────────────────────────────────────
   {
-    word: 'eloquent', meaning: 'Fluent or persuasive in speaking or writing.', sentence: 'The eloquent speaker moved the entire audience to tears.', level: 'intermediate', synonyms: ['articulate', 'fluent', 'expressive'], antonyms: ['inarticulate', 'tongue-tied'], etymology: 'From Latin "eloqui" meaning to speak out.', partOfSpeech: 'adjective', addedVia: 'manual',
+    word: 'eloquent', meaning: 'Fluent or persuasive in speaking or writing.', sentences: ['The eloquent speaker moved the entire audience to tears.', 'The word is commonly used to express this concept in everyday communication.'], level: 'intermediate', synonyms: ['articulate', 'fluent', 'expressive'], antonyms: ['inarticulate', 'tongue-tied'], etymology: 'From Latin "eloqui" meaning to speak out.', partOfSpeech: 'adjective', addedVia: 'manual',
   },
   {
-    word: 'resilient', meaning: 'Able to recover quickly from difficulties; tough.', sentence: 'Children are often more resilient than adults expect.', level: 'intermediate', synonyms: ['tough', 'adaptable', 'robust'], antonyms: ['fragile', 'vulnerable'], etymology: 'From Latin "resilire" meaning to spring back.', partOfSpeech: 'adjective', addedVia: 'manual',
+    word: 'resilient', meaning: 'Able to recover quickly from difficulties; tough.', sentences: ['Children are often more resilient than adults expect.', 'The word is commonly used to express this concept in everyday communication.'], level: 'intermediate', synonyms: ['tough', 'adaptable', 'robust'], antonyms: ['fragile', 'vulnerable'], etymology: 'From Latin "resilire" meaning to spring back.', partOfSpeech: 'adjective', addedVia: 'manual',
   },
   {
-    word: 'ambiguous', meaning: 'Open to more than one interpretation; not having one obvious meaning.', sentence: 'The ambiguous wording of the contract caused legal disputes.', level: 'intermediate', synonyms: ['unclear', 'vague', 'equivocal'], antonyms: ['clear', 'definite', 'unambiguous'], etymology: 'From Latin "ambiguus" meaning doubtful, from "ambigere" to wander.', partOfSpeech: 'adjective', addedVia: 'manual',
+    word: 'ambiguous', meaning: 'Open to more than one interpretation; not having one obvious meaning.', sentences: ['The ambiguous wording of the contract caused legal disputes.', 'The word is commonly used to express this concept in everyday communication.'], level: 'intermediate', synonyms: ['unclear', 'vague', 'equivocal'], antonyms: ['clear', 'definite', 'unambiguous'], etymology: 'From Latin "ambiguus" meaning doubtful, from "ambigere" to wander.', partOfSpeech: 'adjective', addedVia: 'manual',
   },
   {
-    word: 'persist', meaning: 'To continue firmly in a course of action despite difficulty or opposition.', sentence: 'She persisted in her efforts despite repeated failures.', level: 'intermediate', synonyms: ['persevere', 'endure', 'continue'], antonyms: ['give up', 'quit', 'abandon'], etymology: 'From Latin "persistere" meaning to stand firm.', partOfSpeech: 'verb', addedVia: 'manual',
+    word: 'persist', meaning: 'To continue firmly in a course of action despite difficulty or opposition.', sentences: ['She persisted in her efforts despite repeated failures.', 'The word is commonly used to express this concept in everyday communication.'], level: 'intermediate', synonyms: ['persevere', 'endure', 'continue'], antonyms: ['give up', 'quit', 'abandon'], etymology: 'From Latin "persistere" meaning to stand firm.', partOfSpeech: 'verb', addedVia: 'manual',
   },
 
   // ─── ADVANCED ──────────────────────────────────────────────────────────────
   {
-    word: 'ephemeral', meaning: 'Lasting for a very short time; transitory.', sentence: 'The ephemeral beauty of cherry blossoms makes them all the more precious.', level: 'advanced', synonyms: ['transient', 'fleeting', 'momentary', 'short-lived'], antonyms: ['permanent', 'eternal', 'enduring'], etymology: 'From Greek "ephemeros" meaning lasting only a day.', partOfSpeech: 'adjective', addedVia: 'manual',
+    word: 'ephemeral', meaning: 'Lasting for a very short time; transitory.', sentences: ['The ephemeral beauty of cherry blossoms makes them all the more precious.', 'The word is commonly used to express this concept in everyday communication.'], level: 'advanced', synonyms: ['transient', 'fleeting', 'momentary', 'short-lived'], antonyms: ['permanent', 'eternal', 'enduring'], etymology: 'From Greek "ephemeros" meaning lasting only a day.', partOfSpeech: 'adjective', addedVia: 'manual',
   },
   {
-    word: 'laconic', meaning: 'Using very few words; brief and concise in speech or expression.', sentence: 'His laconic reply — "No" — ended the discussion.', level: 'advanced', synonyms: ['terse', 'concise', 'succinct', 'brief'], antonyms: ['verbose', 'loquacious', 'wordy'], etymology: 'From Greek "Lakonikos" referring to Sparta (Laconia), whose inhabitants were known for their brief speech.', partOfSpeech: 'adjective', addedVia: 'manual',
+    word: 'laconic', meaning: 'Using very few words; brief and concise in speech or expression.', sentences: ['His laconic reply — "No" — ended the discussion.', 'The word is commonly used to express this concept in everyday communication.'], level: 'advanced', synonyms: ['terse', 'concise', 'succinct', 'brief'], antonyms: ['verbose', 'loquacious', 'wordy'], etymology: 'From Greek "Lakonikos" referring to Sparta (Laconia), whose inhabitants were known for their brief speech.', partOfSpeech: 'adjective', addedVia: 'manual',
   },
   {
-    word: 'serendipity', meaning: 'The occurrence of events by chance in a happy or beneficial way.', sentence: 'By pure serendipity, she ran into her future business partner at the airport.', level: 'advanced', synonyms: ['chance', 'luck', 'fortuitousness'], antonyms: ['misfortune', 'design', 'intention'], etymology: 'Coined by Horace Walpole in 1754 from the Persian fairy tale "The Three Princes of Serendip".', partOfSpeech: 'noun', addedVia: 'manual',
+    word: 'serendipity', meaning: 'The occurrence of events by chance in a happy or beneficial way.', sentences: ['By pure serendipity, she ran into her future business partner at the airport.', 'The word is commonly used to express this concept in everyday communication.'], level: 'advanced', synonyms: ['chance', 'luck', 'fortuitousness'], antonyms: ['misfortune', 'design', 'intention'], etymology: 'Coined by Horace Walpole in 1754 from the Persian fairy tale "The Three Princes of Serendip".', partOfSpeech: 'noun', addedVia: 'manual',
   },
   {
-    word: 'melancholy', meaning: 'A feeling of pensive sadness, typically with no obvious cause.', sentence: 'The grey skies filled him with a deep melancholy.', level: 'advanced', synonyms: ['sadness', 'gloom', 'sorrow', 'despondency'], antonyms: ['happiness', 'joy', 'elation'], etymology: 'From Greek "melas" (black) + "khole" (bile), based on the ancient theory of humours.', partOfSpeech: 'noun', addedVia: 'manual',
+    word: 'melancholy', meaning: 'A feeling of pensive sadness, typically with no obvious cause.', sentences: ['The grey skies filled him with a deep melancholy.', 'The word is commonly used to express this concept in everyday communication.'], level: 'advanced', synonyms: ['sadness', 'gloom', 'sorrow', 'despondency'], antonyms: ['happiness', 'joy', 'elation'], etymology: 'From Greek "melas" (black) + "khole" (bile), based on the ancient theory of humours.', partOfSpeech: 'noun', addedVia: 'manual',
   },
 
   // ─── EXPERT ────────────────────────────────────────────────────────────────
   {
-    word: 'solipsism', meaning: 'The theory or view that the self is the only thing that can be known to exist.', sentence: 'His philosophical solipsism made meaningful conversation nearly impossible.', level: 'expert', synonyms: ['self-absorption', 'egocentrism'], antonyms: ['altruism', 'empathy'], etymology: 'From Latin "solus" (alone) + "ipse" (self).', partOfSpeech: 'noun', addedVia: 'manual',
+    word: 'solipsism', meaning: 'The theory or view that the self is the only thing that can be known to exist.', sentences: ['His philosophical solipsism made meaningful conversation nearly impossible.', 'The word is commonly used to express this concept in everyday communication.'], level: 'expert', synonyms: ['self-absorption', 'egocentrism'], antonyms: ['altruism', 'empathy'], etymology: 'From Latin "solus" (alone) + "ipse" (self).', partOfSpeech: 'noun', addedVia: 'manual',
   },
   {
-    word: 'limerence', meaning: 'The state of being infatuated with another person, characterized by obsessive thoughts and a desire for reciprocation.', sentence: 'Her limerence for him consumed her every waking thought.', level: 'expert', synonyms: ['infatuation', 'obsession'], antonyms: ['indifference', 'aversion'], etymology: 'Coined by psychologist Dorothy Tennov in 1979 from her research on romantic obsession.', partOfSpeech: 'noun', addedVia: 'manual',
+    word: 'limerence', meaning: 'The state of being infatuated with another person, characterized by obsessive thoughts and a desire for reciprocation.', sentences: ['Her limerence for him consumed her every waking thought.', 'The word is commonly used to express this concept in everyday communication.'], level: 'expert', synonyms: ['infatuation', 'obsession'], antonyms: ['indifference', 'aversion'], etymology: 'Coined by psychologist Dorothy Tennov in 1979 from her research on romantic obsession.', partOfSpeech: 'noun', addedVia: 'manual',
   },
   {
-    word: 'eudaimonia', meaning: 'A Greek concept of human flourishing and living well; the highest form of happiness achieved through virtue.', sentence: 'Aristotle believed eudaimonia was the ultimate goal of human life.', level: 'expert', synonyms: ['flourishing', 'well-being', 'fulfillment'], antonyms: ['misery', 'suffering'], etymology: 'From Greek "eu" (good) + "daimon" (spirit), literally meaning "good spirit".', partOfSpeech: 'noun', addedVia: 'manual',
+    word: 'eudaimonia', meaning: 'A Greek concept of human flourishing and living well; the highest form of happiness achieved through virtue.', sentences: ['Aristotle believed eudaimonia was the ultimate goal of human life.', 'The word is commonly used to express this concept in everyday communication.'], level: 'expert', synonyms: ['flourishing', 'well-being', 'fulfillment'], antonyms: ['misery', 'suffering'], etymology: 'From Greek "eu" (good) + "daimon" (spirit), literally meaning "good spirit".', partOfSpeech: 'noun', addedVia: 'manual',
   },
 ];
 

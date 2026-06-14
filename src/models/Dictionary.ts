@@ -5,7 +5,7 @@ export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert
 export interface IWord extends Document {
   word: string;
   meaning: string;
-  sentence: string;
+  sentences: string[];
   level: DifficultyLevel;
   synonyms: string[];
   antonyms: string[];
@@ -28,9 +28,9 @@ const WordSchema = new Schema<IWord>(
       type: String,
       required: true,
     },
-    sentence: {
-      type: String,
-      required: true,
+    sentences: {
+      type: [String],
+      default: [],
     },
     // ─── DIFFICULTY CATEGORIZATION ────────────────────────────────────────────
     // Words are categorized into 4 difficulty buckets:

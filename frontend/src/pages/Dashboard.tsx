@@ -250,7 +250,9 @@ const Dashboard: React.FC = () => {
             <div className="border-t border-brand-border pt-8 space-y-4">
               <p className="technical-label">Definition</p>
               <p className="text-xl font-serif italic text-brand-muted">{yesterdayWord.meaning}</p>
-              <p className="text-sm text-brand-primary font-medium">"{yesterdayWord.sentence}"</p>
+              {(yesterdayWord.sentences?.length ? yesterdayWord.sentences : [yesterdayWord.sentence]).map((s: string, i: number) => (
+                <p key={i} className="text-sm text-brand-primary font-medium">"{s}"</p>
+              ))}
             </div>
           </div>
         </section>
@@ -294,8 +296,12 @@ const Dashboard: React.FC = () => {
                   {todayWord.meaning}
                 </p>
 
-                <div className="pl-6 border-l-4 border-brand-accent bg-brand-accent/5 py-5 pr-6 rounded-r-2xl text-xl text-brand-primary font-serif leading-relaxed shadow-sm">
-                  "{todayWord.sentence}"
+                <div className="space-y-3">
+                  {(todayWord.sentences?.length ? todayWord.sentences : [todayWord.sentence]).map((s: string, i: number) => (
+                    <div key={i} className="pl-6 border-l-4 border-brand-accent bg-brand-accent/5 py-5 pr-6 rounded-r-2xl text-xl text-brand-primary font-serif leading-relaxed shadow-sm">
+                      "{s}"
+                    </div>
+                  ))}
                 </div>
 
                 {/* Synonyms & Antonyms */}

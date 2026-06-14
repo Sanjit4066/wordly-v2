@@ -134,8 +134,12 @@ const WordDetail: React.FC = () => {
         <p className="text-2xl md:text-3xl font-sans font-medium leading-relaxed text-brand-primary">
           {wordData.meaning}
         </p>
-        <div className="pl-6 border-l-4 border-brand-accent bg-brand-accent/5 py-5 pr-6 rounded-r-2xl text-xl text-brand-primary font-serif leading-relaxed shadow-sm">
-          "{wordData.sentence}"
+        <div className="space-y-3">
+          {(wordData.sentences?.length ? wordData.sentences : [wordData.sentence]).map((s: string, i: number) => (
+            <div key={i} className="pl-6 border-l-4 border-brand-accent bg-brand-accent/5 py-5 pr-6 rounded-r-2xl text-xl text-brand-primary font-serif leading-relaxed shadow-sm">
+              "{s}"
+            </div>
+          ))}
         </div>
 
         {/* Synonyms & Antonyms */}

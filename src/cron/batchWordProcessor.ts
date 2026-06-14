@@ -71,7 +71,7 @@ async function processPendingWords(): Promise<void> {
       const savedWord = await Word.create({
         word: aiData.word,
         meaning: aiData.meaning,
-        sentence: aiData.sentence,
+        sentences: aiData.sentences,
         level: aiData.level,           // ← difficulty bucket assignment
         synonyms: aiData.synonyms,
         antonyms: aiData.antonyms,
