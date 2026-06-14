@@ -138,7 +138,7 @@ async function notifyUsers(
   const notifications = userIds.map((userId) => ({
     userId,
     type: 'word_added' as const,
-    message: `Your requested word "${word}" is now in the ${level} dictionary! Tap to learn it.`,
+    message: `Your requested word "${word}" is now in the ${level} dictionary! Thank you for your contribution to Wordly, this helps us expand our dictionary.`,
     wordId: word,
     isRead: false,
   }));

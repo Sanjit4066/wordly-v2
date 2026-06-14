@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster } from 'sonner';
-import { BookOpen, LayoutDashboard, Zap, LogOut, User as UserIcon, BookMarked, Moon, Sun } from 'lucide-react';
+import { BookOpen, LayoutDashboard, Zap, LogOut, User as UserIcon, BookMarked, Moon, Sun, Star } from 'lucide-react';
 import { LEVEL_TEXT_COLORS } from './utils/colors';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
@@ -13,6 +13,7 @@ import Quiz from './pages/Quiz';
 import WordDetail from './pages/WordDetail';
 import Landing from './pages/Landing';
 import YourWords from './pages/YourWords';
+import Contributions from './pages/Contributions';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, logout } = useAuth();
@@ -24,6 +25,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Library', path: '/library', icon: BookOpen },
     { name: 'Practice', path: '/practice', icon: Zap },
     { name: 'Your Words', path: '/your-words', icon: BookMarked },
+    { name: 'Contributions', path: '/contributions', icon: Star },
   ];
 
   return (
@@ -165,6 +167,7 @@ export default function App() {
             <Route path="/practice" element={<PrivateRoute><Practice /></PrivateRoute>} />
             <Route path="/your-words" element={<PrivateRoute><YourWords /></PrivateRoute>} />
             <Route path="/quiz" element={<PrivateRoute><Quiz /></PrivateRoute>} />
+            <Route path="/contributions" element={<PrivateRoute><Contributions /></PrivateRoute>} />
             <Route path="/word/:term" element={<PrivateRoute><WordDetail /></PrivateRoute>} />
           </Routes>
         </AuthProvider>

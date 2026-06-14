@@ -225,7 +225,23 @@ router.get('/requests', async (req: Request, res: Response) => {
       .sort({ createdAt: -1 })
       .limit(50); // Get recent 50 requests
 
-    res.json({ requests });
+    const doneWords = requests.filter((r) => r.status === 'done').map((r) => r.word);
+    const dictionaryWords = await Word.find({ word: { $in: doneWords } });
+    
+    const wordsMap = dictionaryWords.reduce((acc: any, w: any) => {
+      acc[w.word] = w;
+      return acc;
+    }, {});
+
+    const enrichedRequests = requests.map((r) => {
+      const plain = r.toObject();
+      if (plain.status === 'done' && wordsMap[plain.word]) {
+        plain.dictionaryData = wordsMap[plain.word];
+      }
+      return plain;
+    });
+
+    res.json({ requests: enrichedRequests });
   } catch (error: any) {
     console.error('Failed to fetch requests:', error);
     res.status(500).json({ error: 'Internal server error' });
