@@ -2,7 +2,7 @@
 
 > AI-Powered Vocabulary & Communication App — Complete Architecture Rebuild
 
-**Author:** Sanjit Kushwaha (B.Tech CSE AI, 2026)  
+**Author:** Sanjit Kushwaha (B.Tech CSE AI, 2nd Year)  
 **Version:** 2.0 — Migration from V1 (Wordly: A Word Daily)  
 **Stack:** React 19 · TypeScript · MongoDB · Express · Gemini AI
 
@@ -203,4 +203,4 @@ Every word processed by AI today is **free forever after**. The dictionary grows
 
 ---
 
-*Built with purpose. Shipped with clarity. — Sanjit Kushwaha, 4th Sem AIML*
+*Built with purpose. Shipped with clarity. — Sanjit Kushwaha, B.Tech CSE AI (2nd Year)*
