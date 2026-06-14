@@ -10,11 +10,9 @@
 
 ## Screenshots
 
-<div align="center">
-  <img alt="Wordly Dashboard View" src="https://github.com/user-attachments/assets/3ace2193-3dda-4b17-b1db-409961f79d19" width="45%" />
-  &nbsp;
-  <img alt="Wordly Practice View" src=docs/practice.png />
-</div>
+| Dashboard | Practice |
+| :---: | :---: |
+| <img alt="Dashboard" src="./docs/dashboard.png" width="100%" /> | <img alt="Practice" src="./docs/practice.png" width="100%" /> |
 
 ---
 
