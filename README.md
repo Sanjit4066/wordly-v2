@@ -23,7 +23,7 @@ Our first version, **[Wordly: A Word Daily](https://github.com/Sanjit4066/Wordly
 2. **Database Limitations:** Firebase Firestore lacked the complex querying capabilities needed for a massive, heavily-relational dictionary.
 3. **One Size Fits All:** V1 gave every user the exact same "Word of the Day", regardless of whether they were a beginner or a native speaker.
 
-**Wordly V2** completely solves these problems. By relying on a "Dictionary First, AI Second" philosophy, V2 only calls the AI *once per unique word* during a nightly batch process. Once a word is processed, it is permanently stored in MongoDB and served for free to all future users. We also introduced 4 distinct difficulty levels, ensuring the "Word of the Day" is personalized to your exact vocabulary level.
+**Wordly V2** completely solves these problems. By relying on a "Dictionary First, AI Second" philosophy, V2 groups up to 30 requested words together and processes them all using a **single AI API call** during a nightly batch process. Once a word is processed, it is permanently stored in MongoDB and served for free to all future users. We also introduced 4 distinct difficulty levels, ensuring the "Word of the Day" is personalized to your exact vocabulary level.
 
 ---
 
@@ -57,7 +57,7 @@ Every word in the dictionary is categorized into one of 4 difficulty buckets:
 
 1. User searches for an unknown word (e.g. "ephemeral")
 2. Word is queued in `word_requests` collection
-3. At **11:55 PM**, the batch processor calls Gemini AI **once per word**
+3. At **11:55 PM**, the batch processor groups words into batches of 30 and calls Gemini AI **once per batch** (slashing API usage)
 4. AI returns: meaning, sentence, synonyms, antonyms, etymology, part of speech, **and difficulty level**
 5. Word is saved to the `dictionary` collection under its assigned level
 6. Users who set their level to "advanced" will see "ephemeral" in their Word of Day
@@ -185,7 +185,7 @@ Based on the Ebbinghaus Forgetting Curve:
 |---|---|---|
 | Word of Day | 0 | Pure DB query |
 | Word search (found) | 0 | Dictionary hit |
-| Batch word requests | 1 per unique word | 11:55 PM |
+| Batch word requests | 1 API call per 30 unique words | 11:55 PM |
 | Weekly quiz | 1-2 | Monday 11 PM |
 | **Typical weekday** | **0-5** | — |
 | **Worst case (Monday)** | **~17** | — |
