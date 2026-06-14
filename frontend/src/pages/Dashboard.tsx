@@ -163,25 +163,27 @@ const Dashboard: React.FC = () => {
         if (todayRes.found) {
           setTodayWord(todayRes.data);
           sessionStorage.setItem('wordly_today_word', JSON.stringify(todayRes.data));
-          const sentencesRes = await getSentences(todayWord.word);
+          // ✅ Fix: use todayRes.data.word, NOT todayWord.word (state not updated yet)
+          const sentencesRes = await getSentences(todayRes.data.word);
           setSavedSentences(sentencesRes.sentences || []);
         }
         setPhase('DISCOVERY');
       }
-    } catch (err) {
-      // Render free tier cold start — retry up to 3 times
-      const delays = [3000, 8000, 15000];
-      if (attempt <= 3) {
+      setLoading(false);
+    } catch (err: any) {
+      // Only retry on network/fetch errors (backend cold start), not JS bugs
+      const isNetworkError = !err?.message || err.message.includes('fetch') || err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('Load failed');
+      const delays = [5000, 10000, 20000];
+      if (isNetworkError && attempt <= 3) {
         setWakingUp(true);
         setTimeout(() => loadDashboard(attempt + 1), delays[attempt - 1]);
-        return;
+        // Don't call setLoading(false) — keep spinner showing during retry
+      } else {
+        setWakingUp(false);
+        setLoading(false);
+        console.error('Dashboard error:', err);
+        toast.error('Failed to load dashboard. Please refresh the page.');
       }
-      setWakingUp(false);
-      toast.error('Backend is unavailable. Please try refreshing.');
-    } finally {
-      if (attempt > 3) setLoading(false);
-      else if (attempt === 1) { /* keep loading spinner while waking up */ }
-      else setLoading(false);
     }
   };
 
