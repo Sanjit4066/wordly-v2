@@ -11,10 +11,10 @@
 ## Screenshots
 
 <div align="center">
-  <img src="https://placehold.co/600x400?text=Dashboard+Screenshot" alt="Wordly Dashboard View" width="45%" />
+  <img src="./docs/dashboard.png" alt="Wordly Dashboard View" width="45%" />
   &nbsp;
-  <img src="https://placehold.co/600x400?text=Practice+Screenshot" alt="Wordly Practice View" width="45%" />
-  <p><em>(Replace the <code>src</code> links above with the actual paths to your screenshots on GitHub)</em></p>
+  <img src="./docs/practice.png" alt="Wordly Practice View" width="45%" />
+  <p><em>(Please save the images you just uploaded as <code>dashboard.png</code> and <code>practice.png</code> inside a <code>docs/</code> folder in this repo!)</em></p>
 </div>
 
 ---
