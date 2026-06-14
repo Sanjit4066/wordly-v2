@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap');
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ── Light mode tokens ──────────────────────────────────────────────────────── */
 :root {
   --brand-bg: #FDFCFB;
@@ -46,7 +48,7 @@
 
 @layer components {
   .card {
-    @apply bg-brand-surface border border-brand-border rounded-3xl shadow-sm hover:shadow-lg hover:shadow-brand-primary/5 transition-all duration-500;
+    @apply bg-white dark:bg-brand-surface border border-brand-border rounded-3xl shadow-sm hover:shadow-lg hover:shadow-brand-primary/5 transition-all duration-500;
   }
 
   .nav-link {
@@ -62,7 +64,7 @@
   }
 
   .btn-primary {
-    @apply bg-brand-primary text-brand-bg px-8 py-3 rounded-2xl font-bold hover:bg-brand-accent hover:text-white transition-all duration-300 active:scale-95 shadow-xl shadow-brand-primary/10;
+    @apply bg-brand-primary text-white px-8 py-3 rounded-2xl font-bold hover:bg-brand-accent hover:text-white transition-all duration-300 active:scale-95 shadow-xl shadow-brand-primary/10;
   }
 
   .technical-label {

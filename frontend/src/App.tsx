@@ -99,7 +99,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-brand-border bg-brand-surface text-center transition-colors duration-300">
+      <footer className="py-12 border-t border-brand-border bg-white dark:bg-brand-surface text-center transition-colors duration-300">
         <div className="max-w-2xl mx-auto px-6 space-y-4">
           <h3 className="text-xl font-serif font-black italic">Wordly.</h3>
           <p className="text-sm text-brand-muted max-w-sm mx-auto leading-relaxed">
