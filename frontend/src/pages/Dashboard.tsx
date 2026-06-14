@@ -345,7 +345,7 @@ const Dashboard: React.FC = () => {
               )}
             </button>
             {showNotifs && (
-              <div className="absolute right-0 top-12 w-80 bg-brand-surface border border-brand-border rounded-3xl shadow-2xl z-50 p-4 space-y-3 max-h-80 overflow-y-auto">
+              <div className="absolute right-0 top-12 w-80 bg-white dark:bg-brand-surface border border-brand-border rounded-3xl shadow-2xl z-50 p-4 space-y-3 max-h-80 overflow-y-auto">
                 {notifications.length === 0 ? (
                   <p className="text-sm text-brand-muted italic text-center py-4">No notifications yet</p>
                 ) : notifications.map((n: any) => (
@@ -365,7 +365,7 @@ const Dashboard: React.FC = () => {
               <span className="text-[10px] font-bold uppercase tracking-widest">{profile?.level}</span>
             </button>
             {showLevelMenu && (
-              <div className="absolute right-0 top-12 bg-brand-surface border border-brand-border rounded-3xl shadow-2xl z-50 p-3 space-y-1 w-44">
+              <div className="absolute right-0 top-12 bg-white dark:bg-brand-surface border border-brand-border rounded-3xl shadow-2xl z-50 p-3 space-y-1 w-44">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-brand-muted px-3 pb-2">Change Level</p>
                 {(['beginner', 'intermediate', 'advanced', 'expert'] as const).map((d) => (
                   <button

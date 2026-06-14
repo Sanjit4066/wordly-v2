@@ -123,7 +123,7 @@ const Quiz: React.FC = () => {
           <div className="w-1.5 h-1.5 bg-brand-accent rounded-full"></div>
           <span className="technical-label">Weekly Quiz</span>
         </div>
-        <div className="flex items-center gap-6 bg-brand-surface p-2 px-4 rounded-full border border-brand-border">
+        <div className="flex items-center gap-6 bg-white dark:bg-brand-surface p-2 px-4 rounded-full border border-brand-border">
           <div className="w-32 h-1 bg-brand-bg rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-brand-accent"
@@ -155,7 +155,7 @@ const Quiz: React.FC = () => {
               const isCorrect = option === currentQuestion.answer;
               const showResult = selectedOption !== null;
 
-              let styles = 'bg-brand-surface border-brand-border hover:border-brand-accent hover:bg-brand-bg';
+              let styles = 'bg-white dark:bg-brand-surface border-brand-border hover:border-brand-accent hover:bg-brand-bg';
               if (showResult) {
                 if (isCorrect) styles = 'bg-brand-accent border-brand-accent text-white shadow-lg';
                 else if (isSelected) styles = 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400';

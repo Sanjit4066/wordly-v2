@@ -81,7 +81,7 @@ const Practice: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Enter a word to explore..."
-            className="w-full h-24 pl-20 pr-32 bg-brand-surface border-2 border-brand-border rounded-[2.5rem] text-3xl font-serif italic focus:outline-none focus:border-brand-accent focus:ring-4 ring-brand-accent/5 transition-all shadow-xl shadow-brand-primary/5"
+            className="w-full h-24 pl-20 pr-32 bg-white dark:bg-brand-surface border-2 border-brand-border rounded-[2.5rem] text-3xl font-serif italic focus:outline-none focus:border-brand-accent focus:ring-4 ring-brand-accent/5 transition-all shadow-xl shadow-brand-primary/5"
           />
           <button
             type="submit"
@@ -104,7 +104,7 @@ const Practice: React.FC = () => {
               <button
                 key={s.word}
                 onClick={() => navigate(`/word/${s.word}`)}
-                className="group p-6 bg-brand-surface border border-brand-border rounded-3xl hover:border-brand-accent transition-all text-left"
+                className="group p-6 bg-white dark:bg-brand-surface border border-brand-border rounded-3xl hover:border-brand-accent transition-all text-left"
               >
                 <p className="text-[9px] font-black uppercase tracking-widest text-brand-muted group-hover:text-brand-accent transition-colors">{s.mood}</p>
                 <p className="text-2xl font-serif font-bold italic text-brand-primary lowercase mt-2">{s.word}</p>
@@ -125,7 +125,7 @@ const Practice: React.FC = () => {
               { step: '03', text: 'If not found → queued for AI processing at 11:55 PM' },
               { step: '04', text: 'Next day → word is in the dictionary with difficulty level' },
             ].map((item) => (
-              <div key={item.step} className="flex items-center gap-4 p-4 bg-brand-surface rounded-2xl border border-brand-border">
+              <div key={item.step} className="flex items-center gap-4 p-4 bg-white dark:bg-brand-surface rounded-2xl border border-brand-border">
                 <span className="text-[10px] font-black uppercase tracking-widest text-brand-accent w-6">{item.step}</span>
                 <p className="text-sm text-brand-muted">{item.text}</p>
               </div>
@@ -142,7 +142,7 @@ const Practice: React.FC = () => {
           </h5>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {requests.map((req) => (
-              <div key={req._id} className="p-4 bg-brand-surface border border-brand-border rounded-2xl flex items-center justify-between">
+              <div key={req._id} className="p-4 bg-white dark:bg-brand-surface border border-brand-border rounded-2xl flex items-center justify-between">
                 <span className="font-serif italic font-bold text-brand-primary lowercase">{req.word}</span>
                 {req.status === 'pending' && <Clock className="w-4 h-4 text-amber-500" />}
                 {req.status === 'done' && <CheckCircle2 className="w-4 h-4 text-green-500" />}

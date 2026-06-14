@@ -95,7 +95,7 @@ const Library: React.FC = () => {
         </div>
 
         {/* Search */}
-        <form onSubmit={handleSearch} className="flex gap-4 items-center bg-brand-surface p-2 rounded-[2rem] border border-brand-border shadow-sm">
+        <form onSubmit={handleSearch} className="flex gap-4 items-center bg-white dark:bg-brand-surface p-2 rounded-[2rem] border border-brand-border shadow-sm">
           <div className="relative flex-1">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
             <input
@@ -124,7 +124,7 @@ const Library: React.FC = () => {
           <button
             key={level}
             onClick={() => setActiveLevel(level)}
-            className={`p-6 rounded-3xl border-2 transition-all text-left space-y-2 ${activeLevel === level ? LEVEL_COLORS[level] + ' border-current' : 'bg-brand-surface border-brand-border hover:border-brand-accent/30'}`}
+            className={`p-6 rounded-3xl border-2 transition-all text-left space-y-2 ${activeLevel === level ? LEVEL_COLORS[level] + ' border-current' : 'bg-white dark:bg-brand-surface border-brand-border hover:border-brand-accent/30'}`}
           >
             <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">{level}</p>
             <p className="text-3xl font-serif font-black italic">{stats[level] || 0}</p>
@@ -186,7 +186,7 @@ const Library: React.FC = () => {
                 <button 
                   onClick={handleLoadMore} 
                   disabled={loadingMore} 
-                  className="btn-secondary px-8 py-4 bg-brand-surface border border-brand-border shadow-sm hover:border-brand-accent hover:text-brand-accent transition-all duration-300 rounded-full font-serif italic font-bold disabled:opacity-50"
+                  className="btn-secondary px-8 py-4 bg-white dark:bg-brand-surface border border-brand-border shadow-sm hover:border-brand-accent hover:text-brand-accent transition-all duration-300 rounded-full font-serif italic font-bold disabled:opacity-50"
                 >
                   {loadingMore ? 'Loading...' : 'Load More Words'}
                 </button>

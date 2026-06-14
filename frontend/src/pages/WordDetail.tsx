@@ -179,7 +179,7 @@ const WordDetail: React.FC = () => {
             value={newSentence}
             onChange={(e) => setNewSentence(e.target.value)}
             placeholder={`Use "${wordData.word}" in your own sentence...`}
-            className="w-full h-36 p-6 bg-brand-surface border border-brand-accent/30 rounded-3xl font-serif italic text-xl focus:outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/10 transition-all resize-none"
+            className="w-full h-36 p-6 bg-white dark:bg-brand-surface border border-brand-accent/30 rounded-3xl font-serif italic text-xl focus:outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/10 transition-all resize-none"
           />
           <button
             onClick={handleSave}
@@ -204,7 +204,7 @@ const WordDetail: React.FC = () => {
                     autoFocus
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
-                    className="w-full bg-brand-surface p-4 rounded-xl font-serif italic text-lg focus:outline-none focus:ring-1 ring-brand-accent resize-none h-20"
+                    className="w-full bg-white dark:bg-brand-surface p-4 rounded-xl font-serif italic text-lg focus:outline-none focus:ring-1 ring-brand-accent resize-none h-20"
                   />
                   <div className="flex gap-2 justify-end">
                     <button onClick={() => setEditingId(null)} className="px-4 py-1.5 text-[9px] font-bold uppercase tracking-widest text-brand-muted hover:text-brand-primary flex items-center gap-1">
