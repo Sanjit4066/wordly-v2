@@ -3,6 +3,9 @@
   "version": "2.0.0",
   "description": "Wordly V2 - AI-Powered Vocabulary & Communication App",
   "main": "dist/server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
