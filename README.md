@@ -2,9 +2,20 @@
 
 > AI-Powered Vocabulary & Communication App — Complete Architecture Rebuild
 
-**Author:** Sanjit (4th Sem, AIML B.Tech)  
+**Author:** Sanjit Kushwaha (4th Sem, AIML B.Tech)  
 **Version:** 2.0 — Migration from V1 (Firebase Firestore → MongoDB)  
 **Stack:** React 19 · TypeScript · MongoDB · Express · Gemini AI
+
+---
+
+## Screenshots
+
+<div align="center">
+  <img src="./docs/dashboard.png" alt="Wordly Dashboard View" width="45%" />
+  &nbsp;
+  <img src="./docs/practice.png" alt="Wordly Practice View" width="45%" />
+  <p><em>(Add your screenshots as <code>dashboard.png</code> and <code>practice.png</code> inside a <code>docs/</code> folder to see them here!)</em></p>
+</div>
 
 ---
 
@@ -181,4 +192,4 @@ Every word processed by AI today is **free forever after**. The dictionary grows
 
 ---
 
-*Built with purpose. Shipped with clarity. — Sanjit, 4th Sem AIML*
+*Built with purpose. Shipped with clarity. — Sanjit Kushwaha, 4th Sem AIML*
