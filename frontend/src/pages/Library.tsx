@@ -90,7 +90,7 @@ const Library: React.FC = () => {
           </div>
           <h2 className="text-5xl font-serif font-black italic tracking-tight">Your Lexicon</h2>
           <p className="text-sm text-brand-muted italic">
-            {Object.values(stats).reduce((a: any, b: any) => a + b, 0)} words across 4 difficulty levels.
+            {(Object.values(stats) as number[]).reduce((a, b) => a + b, 0)} words across 4 difficulty levels.
           </p>
         </div>
 
