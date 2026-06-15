@@ -184,8 +184,8 @@ const Profile: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-32">
       <header className="flex items-center justify-between sticky top-24 glass py-4 px-8 z-30 rounded-full border border-brand-border">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-muted hover:text-brand-primary transition-colors cursor-pointer">
-          <ArrowLeft className="w-4 h-4" />
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-muted hover:text-brand-primary transition-colors cursor-pointer group">
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
           Back
         </button>
         <span className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">
@@ -196,47 +196,49 @@ const Profile: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Left Side: Profile Summary Card */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="card p-8 space-y-6">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-32 h-32 rounded-full border-4 border-brand-accent/20 flex items-center justify-center text-brand-accent overflow-hidden relative shadow-lg">
+          <div className="card bg-white/80 dark:bg-brand-surface/80 backdrop-blur-xl border border-brand-accent/20 dark:border-brand-accent/30 rounded-[2.5rem] p-8 space-y-6 shadow-[0_24px_60px_rgba(0,0,0,0.06)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.3)] ring-4 ring-brand-accent/5">
+            <div className="flex flex-col items-center text-center space-y-5">
+              <div className="w-36 h-36 rounded-full border-4 border-white dark:border-brand-surface ring-4 ring-brand-accent/30 flex items-center justify-center text-brand-accent overflow-hidden relative shadow-xl">
                 {profile?.photoURL || user?.photoURL ? (
-                  <img src={profile?.photoURL || user?.photoURL} alt={profile?.displayName} className="w-full h-full object-cover" />
+                  <img src={profile?.photoURL || user?.photoURL || undefined} alt={profile?.displayName} className="w-full h-full object-cover" />
                 ) : (
-                  <UserIcon className="w-12 h-12" />
+                  <UserIcon className="w-14 h-14" />
                 )}
               </div>
-              <div>
-                <h2 className="text-3xl font-serif font-black italic">{profile?.displayName}</h2>
-                <p className="text-[10px] font-bold text-brand-accent uppercase tracking-widest mt-1">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-serif font-black italic text-brand-primary tracking-tight leading-tight">{profile?.displayName}</h2>
+                <span className="text-[9px] font-black text-brand-accent bg-brand-accent/10 border border-brand-accent/20 px-3 py-1 rounded-full uppercase tracking-widest">
                   {profile?.level} Level
-                </p>
+                </span>
                 {profile?.dob && (
-                  <p className="text-[10px] text-brand-muted font-mono uppercase tracking-wider mt-1">
+                  <p className="text-[10px] text-brand-muted font-mono uppercase tracking-wider block pt-1">
                     🍰 DOB: {new Date(profile.dob).toLocaleDateString()}
                   </p>
                 )}
               </div>
-              <p className="text-sm font-serif italic text-brand-muted leading-relaxed">
+              <p className="text-sm font-serif italic text-brand-muted leading-relaxed px-2">
                 "{profile?.bio || 'No bio written yet. Click edit to introduce yourself!'}"
               </p>
             </div>
 
             {/* Social Badge Links */}
-            <div className="border-t border-brand-border pt-6 space-y-3">
-              <p className="technical-label text-center">Connected Networks</p>
-              <div className="flex justify-center gap-4">
+            <div className="border-t border-brand-border/60 pt-6 space-y-4">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-brand-muted/70 text-center font-sans">Connected Networks</p>
+              <div className="flex justify-center gap-3.5">
                 {profile?.githubId ? (
                   <a
                     href={`https://github.com/${profile.githubId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 bg-[#24292e] text-white border border-[#24292e] hover:bg-[#1b1f23] hover:border-[#1b1f23] rounded-2xl transition-all shadow-sm"
+                    className="w-11 h-11 rounded-full flex items-center justify-center border border-brand-border/60 text-brand-muted hover:bg-[#24292e] hover:text-white hover:border-[#24292e] transition-all shadow-sm"
                     title={`GitHub: @${profile.githubId}`}
                   >
                     <Github className="w-5 h-5" />
                   </a>
                 ) : (
-                  <span className="p-3 bg-brand-bg border border-brand-border rounded-2xl text-brand-muted/20 cursor-not-allowed" title="No GitHub Connected"><Github className="w-5 h-5" /></span>
+                  <span className="w-11 h-11 rounded-full flex items-center justify-center border border-brand-border/30 bg-brand-bg/50 text-brand-muted/20 cursor-not-allowed" title="No GitHub Connected">
+                    <Github className="w-5 h-5" />
+                  </span>
                 )}
 
                 {profile?.linkedinId ? (
@@ -244,13 +246,15 @@ const Profile: React.FC = () => {
                     href={profile.linkedinId.startsWith('http') ? profile.linkedinId : `https://linkedin.com/in/${profile.linkedinId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 bg-[#0077b5] text-white border border-[#0077b5] hover:bg-[#005987] hover:border-[#005987] rounded-2xl transition-all shadow-sm"
+                    className="w-11 h-11 rounded-full flex items-center justify-center border border-brand-border/60 text-brand-muted hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all shadow-sm"
                     title="LinkedIn Profile"
                   >
                     <Linkedin className="w-5 h-5" />
                   </a>
                 ) : (
-                  <span className="p-3 bg-brand-bg border border-brand-border rounded-2xl text-brand-muted/20 cursor-not-allowed" title="No LinkedIn Connected"><Linkedin className="w-5 h-5" /></span>
+                  <span className="w-11 h-11 rounded-full flex items-center justify-center border border-brand-border/30 bg-brand-bg/50 text-brand-muted/20 cursor-not-allowed" title="No LinkedIn Connected">
+                    <Linkedin className="w-5 h-5" />
+                  </span>
                 )}
 
                 {profile?.instagramId ? (
@@ -258,22 +262,24 @@ const Profile: React.FC = () => {
                     href={`https://instagram.com/${profile.instagramId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white border border-transparent hover:brightness-110 hover:shadow-md rounded-2xl transition-all shadow-sm"
+                    className="w-11 h-11 rounded-full flex items-center justify-center border border-brand-border/60 text-brand-muted hover:bg-gradient-to-tr hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7] hover:text-white hover:border-transparent transition-all shadow-sm"
                     title={`Instagram: @${profile.instagramId}`}
                   >
                     <Instagram className="w-5 h-5" />
                   </a>
                 ) : (
-                  <span className="p-3 bg-brand-bg border border-brand-border rounded-2xl text-brand-muted/20 cursor-not-allowed" title="No Instagram Connected"><Instagram className="w-5 h-5" /></span>
+                  <span className="w-11 h-11 rounded-full flex items-center justify-center border border-brand-border/30 bg-brand-bg/50 text-brand-muted/20 cursor-not-allowed" title="No Instagram Connected">
+                    <Instagram className="w-5 h-5" />
+                  </span>
                 )}
               </div>
             </div>
 
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-brand-border hover:border-brand-accent hover:text-brand-accent bg-brand-bg hover:bg-brand-accent/5 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 border border-brand-border/80 hover:border-brand-accent hover:text-brand-accent bg-brand-bg hover:bg-brand-accent/5 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all cursor-pointer group"
             >
-              {isEditing ? <X className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
+              {isEditing ? <X className="w-4 h-4" /> : <Edit2 className="w-4 h-4 transition-transform group-hover:rotate-12" />}
               {isEditing ? 'Cancel Edit' : 'Edit Profile'}
             </button>
           </div>
@@ -289,9 +295,9 @@ const Profile: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 onSubmit={handleSave}
-                className="card p-8 md:p-12 space-y-6"
+                className="card bg-white/80 dark:bg-brand-surface/80 backdrop-blur-xl border border-brand-border rounded-[2.5rem] p-8 md:p-12 space-y-6 shadow-xl"
               >
-                <h3 className="text-2xl font-serif font-black italic border-b border-brand-border pb-3">Edit Profile Settings</h3>
+                <h3 className="text-3xl font-serif font-black italic border-b border-brand-border/60 pb-4">Edit Profile Settings</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -302,7 +308,7 @@ const Profile: React.FC = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your display name"
-                      className="w-full px-4 py-3 bg-brand-bg dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
+                      className="w-full px-4 py-3.5 bg-brand-bg/60 dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
                     />
                   </div>
 
@@ -312,17 +318,17 @@ const Profile: React.FC = () => {
                       type="date"
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
-                      className="w-full px-4 py-3 bg-brand-bg dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
+                      className="w-full px-4 py-3.5 bg-brand-bg/60 dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="flex flex-col items-center gap-4 border-b border-brand-border/40 pb-6">
-                  <div className="relative group w-24 h-24 rounded-full border-4 border-brand-accent/20 overflow-hidden shadow-md bg-brand-bg flex items-center justify-center text-brand-accent">
+                  <div className="relative group w-28 h-28 rounded-full border-4 border-brand-accent/25 overflow-hidden shadow-md bg-brand-bg flex items-center justify-center text-brand-accent">
                     {photoURL || user?.photoURL ? (
-                      <img src={photoURL || user?.photoURL} alt="Preview" className="w-full h-full object-cover" />
+                      <img src={photoURL || user?.photoURL || undefined} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
-                      <UserIcon className="w-8 h-8" />
+                      <UserIcon className="w-10 h-10" />
                     )}
                     <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold uppercase tracking-wider gap-1 cursor-pointer">
                       <Edit2 className="w-4 h-4" />
@@ -362,11 +368,11 @@ const Profile: React.FC = () => {
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="A brief bio introducing yourself..."
                     rows={3}
-                    className="w-full px-4 py-3 bg-brand-bg dark:bg-brand-surface border border-brand-border rounded-xl font-serif italic text-base focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all resize-none"
+                    className="w-full px-5 py-4 bg-brand-bg/60 dark:bg-brand-surface border border-brand-border rounded-2xl font-serif italic text-base focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all resize-none"
                   />
                 </div>
 
-                <div className="border-t border-brand-border pt-6 space-y-4">
+                <div className="border-t border-brand-border/60 pt-6 space-y-4">
                   <h4 className="technical-label">Connect Links (Usernames / Handles)</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
@@ -376,7 +382,7 @@ const Profile: React.FC = () => {
                         value={githubId}
                         onChange={(e) => setGithubId(e.target.value)}
                         placeholder="github-username"
-                        className="w-full px-4 py-3 bg-brand-bg dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
+                        className="w-full px-4 py-3 bg-brand-bg/60 dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
                       />
                     </div>
                     <div className="space-y-2">
@@ -386,7 +392,7 @@ const Profile: React.FC = () => {
                         value={linkedinId}
                         onChange={(e) => setLinkedinId(e.target.value)}
                         placeholder="linkedin-username"
-                        className="w-full px-4 py-3 bg-brand-bg dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
+                        className="w-full px-4 py-3 bg-brand-bg/60 dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
                       />
                     </div>
                     <div className="space-y-2">
@@ -396,24 +402,24 @@ const Profile: React.FC = () => {
                         value={instagramId}
                         onChange={(e) => setInstagramId(e.target.value)}
                         placeholder="insta-username"
-                        className="w-full px-4 py-3 bg-brand-bg dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
+                        className="w-full px-4 py-3 bg-brand-bg/60 dark:bg-brand-surface border border-brand-border rounded-xl font-bold text-sm focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-6 border-t border-brand-border">
+                <div className="flex justify-end gap-3 pt-6 border-t border-brand-border/60">
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-muted hover:text-brand-primary cursor-pointer"
+                    className="px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-brand-muted hover:text-brand-primary cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving || bioWordsLeft < 0}
-                    className="px-8 py-3 bg-brand-primary text-white rounded-2xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-accent transition-colors"
+                    className="px-8 py-3.5 bg-brand-primary hover:bg-brand-accent text-white rounded-2xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                     Save Changes
@@ -428,34 +434,35 @@ const Profile: React.FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-6"
               >
-                {/* Streak Stats Card */}
+                {/* Streak Stats Cards */}
                 <div className="grid grid-cols-2 gap-6">
-                  <div className="card p-6 flex items-center gap-4 bg-orange-50/40 dark:bg-orange-950/5 border-orange-100 dark:border-orange-900/10">
-                    <div className="w-12 h-12 bg-orange-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20 animate-pulse">
-                      <Flame className="w-6 h-6" />
+                  <div className="card p-6 flex items-center gap-4 bg-gradient-to-br from-orange-500/10 to-orange-500/5 dark:from-orange-500/20 dark:to-orange-500/5 border border-orange-500/20 rounded-[2rem] shadow-sm">
+                    <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/25">
+                      <Flame className="w-6 h-6 animate-pulse" />
                     </div>
                     <div>
-                      <p className="text-3xl font-serif font-black italic">{streakData.streak} days</p>
-                      <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">Current Streak</p>
+                      <p className="text-4xl font-serif font-black italic text-brand-primary leading-tight">{streakData.streak} days</p>
+                      <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest mt-1">Current Streak</p>
                     </div>
                   </div>
 
-                  <div className="card p-6 flex items-center gap-4 bg-brand-accent/5 border-brand-accent/10">
-                    <div className="w-12 h-12 bg-brand-accent text-white rounded-2xl flex items-center justify-center shadow-lg shadow-brand-accent/20">
+                  <div className="card p-6 flex items-center gap-4 bg-gradient-to-br from-brand-accent/15 to-brand-accent/5 dark:from-brand-accent/20 dark:to-brand-accent/5 border border-brand-accent/20 rounded-[2rem] shadow-sm">
+                    <div className="w-14 h-14 bg-gradient-to-br from-brand-accent to-rose-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-brand-accent/25">
                       <Trophy className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="text-3xl font-serif font-black italic">{streakData.maxStreak} days</p>
-                      <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">Max Streak</p>
+                      <p className="text-4xl font-serif font-black italic text-brand-primary leading-tight">{streakData.maxStreak} days</p>
+                      <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest mt-1">Max Streak</p>
                     </div>
                   </div>
                 </div>
+
                 {/* LeetCode style Activity Heatmap Calendar */}
-                <div className="card p-8 space-y-6">
-                  <div className="flex items-center justify-between border-b border-brand-border pb-3">
+                <div className="card bg-white/80 dark:bg-brand-surface/80 backdrop-blur-xl border border-brand-accent/20 dark:border-brand-accent/30 rounded-[2.5rem] p-8 space-y-6 shadow-xl font-sans">
+                  <div className="flex items-center justify-between border-b border-brand-border/60 pb-4">
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-brand-accent animate-pulse" />
-                      <h4 className="technical-label">Activity Calendar</h4>
+                      <h4 className="technical-label text-brand-primary">Activity Calendar</h4>
                     </div>
                     
                     {/* Years selector list */}
@@ -465,9 +472,9 @@ const Profile: React.FC = () => {
                           key={yr}
                           type="button"
                           onClick={() => setSelectedYear(yr)}
-                          className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
+                          className={`px-4 py-1.5 text-[10px] font-bold rounded-xl transition-all cursor-pointer ${
                             selectedYear === yr
-                              ? 'bg-brand-accent text-white shadow-sm'
+                              ? 'bg-brand-accent text-white shadow-md'
                               : 'bg-brand-bg dark:bg-brand-surface border border-brand-border text-brand-muted hover:text-brand-primary'
                           }`}
                         >
@@ -483,7 +490,7 @@ const Profile: React.FC = () => {
                         {/* Calendar Grid representation */}
                         <div className="flex gap-4 items-end">
                           {/* Day-of-week labels side column */}
-                          <div className="grid grid-rows-7 gap-1 text-[8px] font-bold text-brand-muted uppercase tracking-wider pb-0.5 select-none text-right justify-between w-6 h-[98px]">
+                          <div className="grid grid-rows-7 gap-1 text-[8px] font-bold text-brand-muted uppercase tracking-wider pb-0.5 select-none text-right justify-between w-6 h-[98px] font-sans">
                             <span>Sun</span>
                             <span></span>
                             <span>Tue</span>
@@ -494,17 +501,17 @@ const Profile: React.FC = () => {
                           </div>
 
                           {/* 12 Month blocks container */}
-                          <div className="flex gap-2 items-end">
+                          <div className="flex gap-2.5 items-end">
                             {datesByMonth.map((monthDates, monthIdx) => {
                               const monthName = new Date(selectedYear, monthIdx, 1).toLocaleDateString('en-US', { month: 'short' });
                               return (
                                 <div key={monthIdx} className="flex flex-col space-y-2 border-r border-brand-border/20 pr-2 last:border-r-0 last:pr-0">
                                   {/* Month title */}
-                                  <span className="text-[9px] font-bold text-brand-muted uppercase tracking-wider text-center select-none h-4 border-b border-brand-border/50 pb-1">
+                                  <span className="text-[9px] font-bold text-brand-muted uppercase tracking-wider text-center select-none h-4 border-b border-brand-border/50 pb-1 font-mono">
                                     {monthName}
                                   </span>
                                   {/* Monthly grid */}
-                                  <div className="grid grid-rows-7 grid-flow-col gap-1 h-[98px]">
+                                  <div className="grid grid-rows-7 grid-flow-col gap-1.5 h-[98px]">
                                     {monthDates.map((date, idx) => {
                                       const dateStr = date.toISOString().split('T')[0];
                                       const count = heatmapData[dateStr] || 0;
@@ -512,18 +519,18 @@ const Profile: React.FC = () => {
 
                                       const colorClass =
                                         count === 0
-                                          ? 'bg-slate-100 dark:bg-slate-800/40 border-slate-200/50 dark:border-slate-800/20'
+                                          ? 'bg-slate-100/60 dark:bg-slate-800/20 border-slate-200/20 dark:border-slate-800/10'
                                           : count <= 2
                                           ? 'bg-brand-accent/20 border-brand-accent/30'
                                           : count <= 4
-                                          ? 'bg-brand-accent/55 border-brand-accent/60'
-                                          : 'bg-brand-accent text-white border-brand-accent shadow-sm shadow-brand-accent/25';
+                                          ? 'bg-brand-accent/55 border-brand-accent/60 shadow-sm'
+                                          : 'bg-brand-accent text-white border-brand-accent shadow-md shadow-brand-accent/25';
 
                                       return (
                                         <div
                                           key={idx}
                                           style={{ gridRowStart: dayOfWeek + 1 }}
-                                          className={`w-3 h-3 rounded-sm border transition-all duration-300 hover:scale-125 hover:z-10 cursor-pointer ${colorClass}`}
+                                          className={`w-3.5 h-3.5 rounded-sm border transition-all duration-300 hover:scale-125 hover:z-10 cursor-pointer ${colorClass}`}
                                           title={`${count} words seen on ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
                                         />
                                       );
@@ -538,9 +545,9 @@ const Profile: React.FC = () => {
                     </div>
                     
                     {/* Heatmap Legend */}
-                    <div className="flex items-center justify-end gap-2 text-[10px] text-brand-muted font-bold uppercase tracking-wider pr-4 select-none">
+                    <div className="flex items-center justify-end gap-2 text-[10px] text-brand-muted font-bold uppercase tracking-wider pr-4 select-none font-sans">
                       <span>Less</span>
-                      <div className="w-3 h-3 bg-slate-100 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-800/20 rounded-sm" />
+                      <div className="w-3 h-3 bg-slate-100/60 dark:bg-slate-800/20 border border-slate-200/20 dark:border-slate-800/10 rounded-sm" />
                       <div className="w-3 h-3 bg-brand-accent/20 border border-brand-accent/30 rounded-sm" />
                       <div className="w-3 h-3 bg-brand-accent/55 border border-brand-accent/60 rounded-sm" />
                       <div className="w-3 h-3 bg-brand-accent border border-brand-accent rounded-sm" />
