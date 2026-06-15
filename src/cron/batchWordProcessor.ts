@@ -26,6 +26,36 @@ interface BatchResult {
   failReason?: string;
 }
 
+function getEndOfDayIST(): Date {
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istTime = new Date(now.getTime() + istOffset);
+  istTime.setUTCHours(23, 59, 59, 999);
+  return new Date(istTime.getTime() - istOffset);
+}
+
+async function sendBulkNotificationToUsers(userIds: string[]): Promise<void> {
+  if (userIds.length === 0) return;
+
+  const expiryDate = getEndOfDayIST();
+
+  const notifications = userIds.map((userId) => ({
+    userId,
+    type: 'word_added' as const,
+    message: 'Your requested words are processed, you can find them on the Contributions page. Thank you for your contribution to Wordly! ❤️',
+    wordId: null,
+    isRead: false,
+    expiresAt: expiryDate,
+  }));
+
+  try {
+    await Notification.insertMany(notifications);
+    console.log(`🔔 [Batch Processor] Sent summary notification to ${userIds.length} user(s) (expiring at ${expiryDate.toISOString()})`);
+  } catch (error) {
+    console.error('⚠️  [Batch Processor] Failed to send bulk notifications:', error);
+  }
+}
+
 async function processPendingWords(): Promise<void> {
   console.log('\n🕐 [Batch Processor] Starting nightly word processing...');
 
@@ -40,6 +70,7 @@ async function processPendingWords(): Promise<void> {
   console.log(`📋 [Batch Processor] Processing ${pendingRequests.length} word(s)...`);
 
   const results: BatchResult[] = [];
+  const userIdsToNotify = new Set<string>();
 
   const CHUNK_SIZE = 30;
 
@@ -60,7 +91,9 @@ async function processPendingWords(): Promise<void> {
           processedAt: new Date(),
         });
         results.push({ word, level: existingWord.level, status: 'already_exists' });
-        await notifyUsers(requestedBy, word, existingWord.level);
+        
+        // Accumulate users to notify
+        requestedBy.forEach((uid) => userIdsToNotify.add(uid));
       } else {
         chunkWordsToProcess.push({ word, req: request });
       }
@@ -102,7 +135,9 @@ async function processPendingWords(): Promise<void> {
         });
 
         results.push({ word, level: savedWord.level, status: 'saved' });
-        await notifyUsers(req.requestedBy, word, savedWord.level);
+        
+        // Accumulate users to notify
+        req.requestedBy.forEach((uid: string) => userIdsToNotify.add(uid));
       }
     } catch (error: any) {
       console.error(`❌ [Batch Processor] Failed chunk starting with "${wordsOnly[0]}":`, error.message);
@@ -126,29 +161,11 @@ async function processPendingWords(): Promise<void> {
     await new Promise((res) => setTimeout(res, 2000));
   }
 
+  // Send single aggregated notification to all affected users
+  await sendBulkNotificationToUsers(Array.from(userIdsToNotify));
+
   // ── Print batch summary with difficulty breakdown ──
   printBatchSummary(results);
-}
-
-async function notifyUsers(
-  userIds: string[],
-  word: string,
-  level: DifficultyLevel
-): Promise<void> {
-  const notifications = userIds.map((userId) => ({
-    userId,
-    type: 'word_added' as const,
-    message: `Your requested word "${word}" is now in the ${level} dictionary! Thank you for your contribution to Wordly, this helps us expand our dictionary.`,
-    wordId: word,
-    isRead: false,
-  }));
-
-  try {
-    await Notification.insertMany(notifications);
-    console.log(`🔔 [Batch Processor] Notified ${userIds.length} user(s) about "${word}"`);
-  } catch (error) {
-    console.error(`⚠️  [Batch Processor] Failed to send notifications for "${word}":`, error);
-  }
 }
 
 function printBatchSummary(results: BatchResult[]): void {
