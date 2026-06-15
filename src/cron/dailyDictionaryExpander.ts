@@ -350,15 +350,13 @@ async function runDailyExpansion(): Promise<void> {
 }
 
 // ─── CRON SCHEDULE ────────────────────────────────────────────────────────────
-// '0 10 * * *' → 10:00 AM UTC = 5:00 AM EST (UTC-5) / 6:00 AM EDT (UTC-4)
-// node-cron uses the server's local timezone unless TZ is set.
-// For reliability, always run the server with TZ=UTC (see .env or process.env.TZ).
+// '0 5 * * *' → 5:00 AM IST
+// node-cron uses the specified timezone option.
 
 export function startDailyDictionaryExpander(): void {
-  // '0 10 * * *' = every day at 10:00 UTC = 5:00 AM EST
-  const schedule = process.env.EXPANDER_CRON || '0 10 * * *';
+  const schedule = process.env.EXPANDER_CRON || '0 5 * * *';
 
-  console.log('⏰ [Daily Expander] Cron job scheduled: 5:00 AM EST (10:00 UTC) daily');
+  console.log('⏰ [Daily Expander] Cron job scheduled: 5:00 AM IST daily');
 
   cron.schedule(schedule, async () => {
     try {
@@ -367,7 +365,7 @@ export function startDailyDictionaryExpander(): void {
       console.error('❌ [Daily Expander] Cron job crashed:', error);
     }
   }, {
-    timezone: 'America/New_York', // EST/EDT handled automatically
+    timezone: 'Asia/Kolkata',
   });
 }
 

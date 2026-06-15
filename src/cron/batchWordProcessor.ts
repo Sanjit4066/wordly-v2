@@ -192,16 +192,18 @@ function printBatchSummary(results: BatchResult[]): void {
   console.log('✅ [Batch Processor] Done.\n');
 }
 
-// ─── CRON JOB: Runs every day at 11:55 PM ─────────────────────────────────────
+// ─── CRON JOB: Runs every day at 4:00 AM IST ───────────────────────────────────
 export function startBatchWordProcessor(): void {
-  console.log('⏰ [Batch Processor] Cron job scheduled: 11:55 PM daily');
+  console.log('⏰ [Batch Processor] Cron job scheduled: 4:00 AM IST daily');
 
-  cron.schedule('55 23 * * *', async () => {
+  cron.schedule('0 4 * * *', async () => {
     try {
       await processPendingWords();
     } catch (error) {
       console.error('❌ [Batch Processor] Cron job crashed:', error);
     }
+  }, {
+    timezone: 'Asia/Kolkata',
   });
 }
 
