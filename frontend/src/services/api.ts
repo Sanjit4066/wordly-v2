@@ -151,8 +151,9 @@ export async function submitQuiz(quizId: string, answers: Record<string, string>
 
 // ─── PROGRESS ────────────────────────────────────────────────────────────────
 
-export async function getHeatmap() {
-  const res = await fetch(`${BASE}/progress/heatmap`, { headers: headers() });
+export async function getHeatmap(year?: number) {
+  const url = year ? `${BASE}/progress/heatmap?year=${year}` : `${BASE}/progress/heatmap`;
+  const res = await fetch(url, { headers: headers() });
   return res.json();
 }
 
@@ -182,5 +183,21 @@ export async function markMastery(wordId: string, masteryLevel: 'seen' | 'practi
 
 export async function getUserWords() {
   const res = await fetch(`${BASE}/sentences/user/all`, { headers: headers() });
+  return res.json();
+}
+
+// ─── USER PROFILE ─────────────────────────────────────────────────────────────
+
+export async function getUserProfile() {
+  const res = await fetch(`${BASE}/user/profile`, { headers: headers() });
+  return res.json();
+}
+
+export async function updateUserProfile(data: any) {
+  const res = await fetch(`${BASE}/user/profile`, {
+    method: 'PUT',
+    headers: headers(),
+    body: JSON.stringify(data),
+  });
   return res.json();
 }

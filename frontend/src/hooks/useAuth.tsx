@@ -7,17 +7,23 @@ import {
   signOut
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { getUserLevel, setUserLevel, sendWelcomeNotification } from '../services/api';
+import { getUserLevel, setUserLevel, sendWelcomeNotification, getUserProfile } from '../services/api';
 
 export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 
-interface UserProfile {
+export interface UserProfile {
   uid: string;
   displayName: string;
   photoURL: string;
   level: DifficultyLevel;
   streak: number;
   wordsLearned: number;
+  dob: string;
+  bio: string;
+  githubId: string;
+  linkedinId: string;
+  instagramId: string;
+  maxStreak: number;
 }
 
 interface AuthContextType {
@@ -25,8 +31,10 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   signIn: () => Promise<void>;
+  devSignIn: () => void;
   logout: () => Promise<void>;
   updateDifficulty: (level: DifficultyLevel) => void;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,21 +44,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchAndSetProfile = async (uid: string, defaultName: string, defaultPhoto: string) => {
+    try {
+      const dbProfile = await getUserProfile();
+      setProfile({
+        uid,
+        displayName: dbProfile?.displayName || defaultName,
+        photoURL: dbProfile?.photoURL || defaultPhoto,
+        level: (getUserLevel() as DifficultyLevel) || 'intermediate',
+        streak: 0,
+        wordsLearned: 0,
+        dob: dbProfile?.dob || '',
+        bio: dbProfile?.bio || '',
+        githubId: dbProfile?.githubId || '',
+        linkedinId: dbProfile?.linkedinId || '',
+        instagramId: dbProfile?.instagramId || '',
+        maxStreak: dbProfile?.maxStreak || 0,
+      });
+    } catch (err) {
+      console.error('Failed to load profile from DB, falling back:', err);
+      setProfile({
+        uid,
+        displayName: defaultName,
+        photoURL: defaultPhoto,
+        level: (getUserLevel() as DifficultyLevel) || 'intermediate',
+        streak: 0,
+        wordsLearned: 0,
+        dob: '',
+        bio: '',
+        githubId: '',
+        linkedinId: '',
+        instagramId: '',
+        maxStreak: 0,
+      });
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (!localStorage.getItem('wordly_user_id')) return;
+    const uid = localStorage.getItem('wordly_user_id')!;
+    const name = profile?.displayName || 'Learner';
+    const photo = profile?.photoURL || '';
+    await fetchAndSetProfile(uid, name, photo);
+  };
+
   useEffect(() => {
+    const isDev = localStorage.getItem('wordly_dev_mode') === 'true';
+    if (isDev) {
+      setUser({
+        uid: 'dev-user-id',
+        displayName: 'Dev Reviewer',
+        photoURL: '',
+      } as any);
+      fetchAndSetProfile('dev-user-id', 'Dev Reviewer', '');
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
         // Store user ID for API calls
         localStorage.setItem('wordly_user_id', firebaseUser.uid);
-
-        setProfile({
-          uid: firebaseUser.uid,
-          displayName: firebaseUser.displayName || 'Learner',
-          photoURL: firebaseUser.photoURL || '',
-          level: (getUserLevel() as DifficultyLevel) || 'intermediate',
-          streak: 0,
-          wordsLearned: 0,
-        });
+        await fetchAndSetProfile(firebaseUser.uid, firebaseUser.displayName || 'Learner', firebaseUser.photoURL || '');
         
         // Ensure user gets a welcome notification permanently
         sendWelcomeNotification(firebaseUser.displayName || 'Learner').catch(err => console.error("Welcome err:", err));
@@ -74,8 +130,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const devSignIn = () => {
+    localStorage.setItem('wordly_dev_mode', 'true');
+    localStorage.setItem('wordly_user_id', 'dev-user-id');
+    setUser({
+      uid: 'dev-user-id',
+      displayName: 'Dev Reviewer',
+      photoURL: '',
+    } as any);
+    fetchAndSetProfile('dev-user-id', 'Dev Reviewer', '');
+  };
+
   const logout = async () => {
-    await signOut(auth);
+    localStorage.removeItem('wordly_dev_mode');
+    localStorage.removeItem('wordly_user_id');
+    setUser(null);
+    setProfile(null);
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const updateDifficulty = (level: DifficultyLevel) => {
@@ -84,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, logout, updateDifficulty }}>
+    <AuthContext.Provider value={{ user, profile, loading, signIn, devSignIn, logout, updateDifficulty, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

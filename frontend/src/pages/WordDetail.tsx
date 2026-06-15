@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Volume2, Loader2, Send, Edit2, Trash2, Check, X, Clock } from 'lucide-react';
+import { ArrowLeft, Volume2, Loader2, Send, Edit2, Trash2, Check, X, Clock, Mic, MicOff, Play } from 'lucide-react';
 import { searchWord, getSentences, saveSentence, editSentence, deleteSentence } from '../services/api';
 import { LEVEL_COLORS } from '../utils/colors';
 import { Link } from 'react-router-dom';
@@ -17,11 +17,34 @@ const WordDetail: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [speechFeedback, setSpeechFeedback] = useState<'idle' | 'listening' | 'success' | 'retry' | 'unsupported'>('idle');
+  const [spokenText, setSpokenText] = useState('');
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     if (!term) return;
     loadWord();
   }, [term]);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
 
   const loadWord = async () => {
     setLoading(true);
@@ -89,6 +112,112 @@ const WordDetail: React.FC = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+    } catch (err) {
+      console.error('Failed to start recording', err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const playRecordedAudio = () => {
+    if (!audioUrl) return;
+    const audio = new Audio(audioUrl);
+    audio.play().catch(err => console.error('Playback failed', err));
+  };
+
+  const handleSpeech = () => {
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+      stopRecording();
+      setIsListening(false);
+      setSpeechFeedback('idle');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Speech recognition is not supported in this browser. Try Chrome, Edge, or Safari.');
+      setSpeechFeedback('unsupported');
+      return;
+    }
+
+    setSpeechFeedback('listening');
+    setIsListening(true);
+    setSpokenText('');
+    setAudioUrl(null);
+    startRecording();
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event: any) => {
+      const speechToText = event.results[0][0].transcript;
+      setSpokenText(speechToText);
+
+      // Clean punctuation, spaces, and casing
+      const cleanTarget = (wordData.word || '').trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+      const cleanSpoken = speechToText.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+
+      if (cleanSpoken.includes(cleanTarget) || cleanTarget.includes(cleanSpoken)) {
+        setSpeechFeedback('success');
+        toast.success(`Excellent! You said: "${speechToText}"`);
+      } else {
+        setSpeechFeedback('retry');
+        toast.error(`Not quite. Heard: "${speechToText}". Try again!`);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      stopRecording();
+      if (event.error === 'aborted') return;
+      console.error(event.error);
+      setIsListening(false);
+      setSpeechFeedback('retry');
+      if (event.error === 'not-allowed') {
+        toast.error('Microphone access denied. Please check settings.');
+      } else {
+        toast.error('Speech recognition failed. Try again.');
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      stopRecording();
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
       <Loader2 className="w-12 h-12 text-brand-accent animate-spin" />
@@ -115,13 +244,71 @@ const WordDetail: React.FC = () => {
         <h1 className="text-7xl md:text-9xl font-serif font-black italic tracking-tighter leading-none lowercase text-brand-accent">
           {wordData.word}
         </h1>
-        <div className="flex items-center justify-center gap-6">
-          <button onClick={playAudio} className="flex items-center gap-2 text-brand-muted hover:text-brand-accent transition-colors">
-            <Volume2 className="w-5 h-5" />
-            <span className="text-lg font-serif italic">Hear it</span>
-          </button>
-          <span className="w-1.5 h-1.5 bg-brand-border rounded-full"></span>
-          <span className="text-brand-accent font-bold uppercase tracking-[0.2em] text-[10px]">{wordData.partOfSpeech}</span>
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex items-center justify-center gap-6">
+            <button onClick={playAudio} className="flex items-center gap-2 text-brand-muted hover:text-brand-accent transition-colors">
+              <Volume2 className="w-5 h-5" />
+              <span className="text-lg font-serif italic">Hear it</span>
+            </button>
+            
+            <span className="w-1.5 h-1.5 bg-brand-border rounded-full"></span>
+            
+            <button
+              onClick={handleSpeech}
+              className={`flex items-center gap-2 transition-all duration-300 cursor-pointer ${
+                speechFeedback === 'listening'
+                  ? 'text-red-500 animate-pulse font-bold'
+                  : speechFeedback === 'success'
+                  ? 'text-emerald-500 font-bold scale-105'
+                  : speechFeedback === 'retry'
+                  ? 'text-amber-500'
+                  : 'text-brand-muted hover:text-brand-accent'
+              }`}
+              title="Speak to practice pronunciation"
+            >
+              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              <span className="text-lg font-serif italic">
+                {speechFeedback === 'listening'
+                  ? 'Listening...'
+                  : speechFeedback === 'success'
+                  ? 'Perfect!'
+                  : speechFeedback === 'retry'
+                  ? 'Try again'
+                  : 'Speak it'}
+              </span>
+            </button>
+
+            {audioUrl && (
+              <>
+                <span className="w-1.5 h-1.5 bg-brand-border rounded-full"></span>
+                <button
+                  onClick={playRecordedAudio}
+                  className="flex items-center gap-2 text-brand-muted hover:text-emerald-500 transition-colors cursor-pointer"
+                  title="Play back your own voice recording"
+                >
+                  <Play className="w-5 h-5 text-emerald-500 animate-pulse" />
+                  <span className="text-lg font-serif italic text-emerald-500 font-bold">Play me</span>
+                </button>
+              </>
+            )}
+
+            <span className="w-1.5 h-1.5 bg-brand-border rounded-full"></span>
+            
+            <span className="text-brand-accent font-bold uppercase tracking-[0.2em] text-[10px]">{wordData.partOfSpeech}</span>
+          </div>
+          
+          <AnimatePresence>
+            {spokenText && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                className="text-xs font-mono uppercase tracking-wider text-brand-muted/80"
+              >
+                Heard: "{spokenText}"
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.section>
 

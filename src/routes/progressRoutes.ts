@@ -9,11 +9,23 @@ router.get('/heatmap', async (req: Request, res: Response) => {
     const userId = req.headers['x-user-id'] as string;
     if (!userId) return res.status(401).json({ error: 'User ID required' });
 
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const { year } = req.query;
+    let startDate: Date;
+    let endDate: Date;
+
+    if (year) {
+      const y = parseInt(year as string);
+      startDate = new Date(y, 0, 1); // Jan 1st of year
+      endDate = new Date(y, 11, 31, 23, 59, 59); // Dec 31st of year
+    } else {
+      // Default to last 12 months
+      startDate = new Date();
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      endDate = new Date();
+    }
 
     const entries = await UserProgress.find(
-      { userId, seenAt: { $gte: sixMonthsAgo } },
+      { userId, seenAt: { $gte: startDate, $lte: endDate } },
       'seenAt'
     );
 

@@ -4,7 +4,7 @@ import {
   Trophy, Flame, BookOpen, TrendingUp,
   Volume2, CheckCircle2, ArrowRight,
   Loader2, RotateCcw, Send, Bell, Settings,
-  Star, BookMarked
+  Star, BookMarked, Award, CheckSquare, Sparkles, Book
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { LEVEL_COLORS } from '../utils/colors';
@@ -60,6 +60,63 @@ function getDailyQuote() {
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   return QUOTES[dayOfYear % QUOTES.length];
 }
+
+const BADGES = [
+  {
+    id: 'first_step',
+    title: 'First Step',
+    desc: 'Saw 1+ words',
+    icon: Book,
+    color: 'bg-indigo-500',
+    check: (streak: number, m: any) => {
+      const seen = (m.seen || 0) + (m.practiced || 0) + (m.familiar || 0) + (m.mastered || 0);
+      return seen >= 1;
+    }
+  },
+  {
+    id: 'streak_3',
+    title: 'Consistent',
+    desc: '3-Day Streak',
+    icon: Flame,
+    color: 'bg-orange-500',
+    check: (streak: number) => streak >= 3
+  },
+  {
+    id: 'streak_7',
+    title: 'Unstoppable',
+    desc: '7-Day Streak',
+    icon: Sparkles,
+    color: 'bg-yellow-500',
+    check: (streak: number) => streak >= 7
+  },
+  {
+    id: 'words_20',
+    title: 'Collector',
+    desc: 'Encountered 20+ words',
+    icon: BookOpen,
+    color: 'bg-blue-500',
+    check: (streak: number, m: any) => {
+      const total = (m.seen || 0) + (m.practiced || 0) + (m.familiar || 0) + (m.mastered || 0);
+      return total >= 20;
+    }
+  },
+  {
+    id: 'practiced_10',
+    title: 'Practitioner',
+    desc: 'Practiced 10+ words',
+    icon: CheckSquare,
+    color: 'bg-green-500',
+    check: (streak: number, m: any) => (m.practiced || 0) + (m.familiar || 0) + (m.mastered || 0) >= 10
+  },
+  {
+    id: 'mastered_5',
+    title: 'Word Master',
+    desc: 'Mastered 5+ words',
+    icon: Award,
+    color: 'bg-brand-accent',
+    check: (streak: number, m: any) => (m.mastered || 0) >= 5
+  }
+];
 
 const Dashboard: React.FC = () => {
   const { profile, updateDifficulty } = useAuth();
@@ -144,7 +201,7 @@ const Dashboard: React.FC = () => {
       setMastery(masteryRes.mastery || {});
       setNotifCount(notifRes.count || 0);
 
-      if (yesterdayRes.found) {
+      if (yesterdayRes.found && (!yesterdayRes.progress || !yesterdayRes.progress.selfMark)) {
         setYesterdayWord(yesterdayRes.word);
         setPhase('REVIEW');
 
@@ -367,6 +424,53 @@ const Dashboard: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+
+  const achievementsRow = (
+    <div className="space-y-6 pt-6 border-t border-brand-border">
+      <div className="flex items-center gap-3">
+        <Award className="w-5 h-5 text-brand-accent animate-bounce" />
+        <h4 className="technical-label">Milestone Achievements</h4>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {BADGES.map((badge) => {
+          const isUnlocked = badge.check(streak, mastery);
+          return (
+            <div
+              key={badge.id}
+              className={`card p-5 flex flex-col items-center text-center space-y-3 transition-all duration-300 relative overflow-hidden group ${
+                isUnlocked
+                  ? 'bg-white dark:bg-brand-surface border-brand-accent/20 shadow-md hover:scale-105'
+                  : 'bg-brand-bg/40 dark:bg-brand-bg/10 border-brand-border opacity-55'
+              }`}
+            >
+              <div
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:rotate-12 ${
+                  isUnlocked
+                    ? `${badge.color} text-white shadow-lg`
+                    : 'bg-brand-border/60 text-brand-muted dark:bg-brand-border/20'
+                }`}
+              >
+                <badge.icon className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <p className={`text-xs font-bold uppercase tracking-wider ${isUnlocked ? 'text-brand-primary' : 'text-brand-muted'}`}>
+                  {badge.title}
+                </p>
+                <p className="text-[10px] text-brand-muted font-serif italic">
+                  {badge.desc}
+                </p>
+              </div>
+              {!isUnlocked && (
+                <div className="absolute top-2 right-2 text-[9px] font-bold text-brand-muted">
+                  🔒
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 
@@ -685,12 +789,18 @@ const Dashboard: React.FC = () => {
 
           {/* ── Stats Row — at the bottom ────────────────────────────────────── */}
           {statsRow}
+          {achievementsRow}
 
         </section>
       )}
 
       {/* Stats if not in discovery phase yet */}
-      {phase !== 'DISCOVERY' && statsRow}
+      {phase !== 'DISCOVERY' && (
+        <div className="space-y-12">
+          {statsRow}
+          {achievementsRow}
+        </div>
+      )}
 
       {phase === 'DISCOVERY' && !todayWord && !loading && (
         <div className="card p-16 text-center space-y-6 bg-white">

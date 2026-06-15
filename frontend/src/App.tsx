@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster } from 'sonner';
-import { BookOpen, LayoutDashboard, Zap, LogOut, User as UserIcon, BookMarked, Moon, Sun, Star } from 'lucide-react';
+import { BookOpen, LayoutDashboard, Zap, LogOut, User as UserIcon, BookMarked, Moon, Sun, Star, Github, Linkedin, Instagram, ChevronRight } from 'lucide-react';
 import { LEVEL_TEXT_COLORS } from './utils/colors';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
@@ -15,10 +15,26 @@ import Landing from './pages/Landing';
 import YourWords from './pages/YourWords';
 import Contributions from './pages/Contributions';
 
+import Profile from './pages/Profile';
+
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { profile, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showFullBio, setShowFullBio] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const clickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+        setShowFullBio(false);
+      }
+    };
+    document.addEventListener('mousedown', clickOutside);
+    return () => document.removeEventListener('mousedown', clickOutside);
+  }, []);
 
   const navItems = [
     { name: 'Home', path: '/', icon: LayoutDashboard },
@@ -62,24 +78,156 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             }
           </button>
 
-          <div className="hidden sm:flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-xs font-bold truncate max-w-[150px]">{profile?.displayName}</p>
-              <p className={`text-[10px] font-bold uppercase tracking-wider ${LEVEL_TEXT_COLORS[profile?.level || 'intermediate']}`}>
-                {profile?.level} level
-              </p>
+          <div className="relative" ref={dropdownRef}>
+            <div
+              onClick={() => {
+                setShowDropdown(!showDropdown);
+                if (showDropdown) setShowFullBio(false);
+              }}
+              className="hidden sm:flex items-center gap-3 cursor-pointer hover:opacity-80 transition-all select-none"
+            >
+              <div className="text-right">
+                <p className="text-xs font-bold truncate max-w-[150px]">{profile?.displayName}</p>
+                <p className={`text-[10px] font-bold uppercase tracking-wider ${LEVEL_TEXT_COLORS[profile?.level || 'intermediate']}`}>
+                  {profile?.level} level
+                </p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center text-brand-accent overflow-hidden">
+                {profile?.photoURL || user?.photoURL ? (
+                  <img src={profile?.photoURL || user?.photoURL} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <UserIcon className="w-4 h-4" />
+                )}
+              </div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center text-brand-accent overflow-hidden">
-              {profile?.photoURL ? (
-                <img src={profile.photoURL} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <UserIcon className="w-4 h-4" />
+
+            <AnimatePresence>
+              {showDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute right-0 top-14 bg-white dark:bg-brand-surface border-2 border-brand-accent/30 dark:border-brand-accent/40 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] ring-4 ring-brand-accent/5 z-50 p-4 w-64 space-y-4"
+                >
+                  <div className="border-b border-brand-border pb-3 space-y-1.5">
+                    <p className="text-sm font-bold truncate text-brand-primary">{profile?.displayName}</p>
+                    {user?.email && (
+                      <p className="text-[10px] font-mono text-brand-muted truncate">{user.email}</p>
+                    )}
+                    
+                    {/* Collapsible Bio */}
+                    <div className="mt-1">
+                      {profile?.bio ? (
+                        showFullBio ? (
+                          <div className="space-y-1 bg-brand-bg/50 dark:bg-brand-surface/50 p-2 rounded-xl border border-brand-border/40">
+                            <p className="text-[10px] text-brand-muted font-serif italic whitespace-pre-wrap leading-relaxed">
+                              {profile.bio}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowFullBio(false);
+                              }}
+                              className="text-[9px] font-bold text-brand-accent hover:underline cursor-pointer focus:outline-none"
+                            >
+                              Hide Bio
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 justify-between">
+                            <p className="text-[10px] text-brand-muted font-serif italic truncate flex-1">
+                              {profile.bio}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowFullBio(true);
+                              }}
+                              className="text-[9px] font-bold text-brand-accent hover:underline shrink-0 cursor-pointer focus:outline-none"
+                            >
+                              See Bio
+                            </button>
+                          </div>
+                        )
+                      ) : (
+                        <p className="text-[10px] text-brand-muted/50 font-serif italic">No bio yet.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Link
+                      to="/profile"
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-brand-muted hover:text-brand-primary hover:bg-brand-bg transition-all"
+                    >
+                      <span>View Profile</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
+
+                    {/* CONNECT ME Submenu */}
+                    <div className="space-y-2 pt-2 border-t border-brand-border">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-brand-muted px-3">Connect Me</p>
+                      <div className="flex justify-around py-1 bg-brand-bg dark:bg-brand-surface rounded-xl border border-brand-border">
+                        {profile?.githubId ? (
+                          <a
+                            href={`https://github.com/${profile.githubId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 text-[#24292e] dark:text-zinc-200 hover:text-black dark:hover:text-white transition-colors"
+                            title={`GitHub: @${profile.githubId}`}
+                          >
+                            <Github className="w-4 h-4" />
+                          </a>
+                        ) : (
+                          <span className="p-2 text-brand-muted/20 cursor-not-allowed"><Github className="w-4 h-4" /></span>
+                        )}
+
+                        {profile?.linkedinId ? (
+                          <a
+                            href={profile.linkedinId.startsWith('http') ? profile.linkedinId : `https://linkedin.com/in/${profile.linkedinId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 text-[#0077b5] hover:text-[#005987] transition-colors"
+                            title="LinkedIn"
+                          >
+                            <Linkedin className="w-4 h-4" />
+                          </a>
+                        ) : (
+                          <span className="p-2 text-brand-muted/20 cursor-not-allowed"><Linkedin className="w-4 h-4" /></span>
+                        )}
+
+                        {profile?.instagramId ? (
+                          <a
+                            href={`https://instagram.com/${profile.instagramId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 text-[#ee2a7b] hover:text-[#c13584] transition-colors"
+                            title={`Instagram: @${profile.instagramId}`}
+                          >
+                            <Instagram className="w-4 h-4" />
+                          </a>
+                        ) : (
+                          <span className="p-2 text-brand-muted/20 cursor-not-allowed"><Instagram className="w-4 h-4" /></span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false);
+                      logout();
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    Sign Out
+                  </button>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
           </div>
-          <button onClick={logout} className="text-[10px] uppercase font-bold tracking-widest text-brand-muted hover:text-brand-primary transition-colors">
-            Sign out
-          </button>
         </div>
       </header>
 
@@ -169,6 +317,7 @@ export default function App() {
             <Route path="/quiz" element={<PrivateRoute><Quiz /></PrivateRoute>} />
             <Route path="/contributions" element={<PrivateRoute><Contributions /></PrivateRoute>} />
             <Route path="/word/:term" element={<PrivateRoute><WordDetail /></PrivateRoute>} />
+            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           </Routes>
         </AuthProvider>
       </ThemeProvider>

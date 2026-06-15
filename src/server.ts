@@ -14,6 +14,7 @@ import notificationRoutes from './routes/notificationRoutes';
 import quizRoutes from './routes/quizRoutes';
 import progressRoutes from './routes/progressRoutes';
 import adminRoutes from './routes/adminRoutes';
+import userRoutes from './routes/userRoutes';
 
 // Cron jobs
 import { startBatchWordProcessor } from './cron/batchWordProcessor';
@@ -44,7 +45,7 @@ app.use(cors({
   },
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/word', wordRoutes);
@@ -54,6 +55,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/user', userRoutes);
 
 // Health check
 app.get('/health', (_req, res) => {

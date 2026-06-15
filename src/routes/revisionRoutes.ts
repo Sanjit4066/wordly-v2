@@ -63,6 +63,13 @@ router.get('/yesterday', async (req: Request, res: Response) => {
       });
     }
 
+    if (progress.selfMark) {
+      return res.json({
+        found: false,
+        message: "Yesterday's word was already self-marked.",
+      });
+    }
+
     const word = await Word.findOne({ word: progress.wordId });
     if (!word) {
       return res.json({ found: false, message: 'Word data not found.' });

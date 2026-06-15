@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 
 const Landing: React.FC = () => {
-  const { user, signIn, loading } = useAuth();
+  const { user, signIn, devSignIn, loading } = useAuth();
 
   if (user) return <Navigate to="/" />;
 
@@ -63,19 +63,27 @@ const Landing: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
-          className="pt-12"
+          className="pt-12 flex flex-col items-center gap-4"
         >
-          <button
-            onClick={signIn}
-            disabled={loading}
-            className="group relative inline-flex items-center gap-6 btn-primary text-lg px-12 py-5"
-          >
-            <span>Start your journey</span>
-            <LogIn className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
-            {loading && <div className="absolute -right-12 w-6 h-6 border-2 border-brand-accent/20 border-t-brand-accent rounded-full animate-spin" />}
-          </button>
-          <div className="mt-8 text-[10px] font-bold text-brand-muted uppercase tracking-[0.2em] opacity-40">
-            Sign in with Google to begin
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <button
+              onClick={signIn}
+              disabled={loading}
+              className="group relative inline-flex items-center gap-6 btn-primary text-lg px-12 py-5 cursor-pointer"
+            >
+              <span>Start your journey</span>
+              <LogIn className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              {loading && <div className="absolute -right-12 w-6 h-6 border-2 border-brand-accent/20 border-t-brand-accent rounded-full animate-spin" />}
+            </button>
+            <button
+              onClick={devSignIn}
+              className="group inline-flex items-center gap-2 px-8 py-5 border border-brand-accent/30 hover:border-brand-accent bg-brand-accent/5 hover:bg-brand-accent/15 text-brand-accent rounded-2xl font-bold transition-all text-sm cursor-pointer shadow-lg shadow-brand-accent/5"
+            >
+              🛠️ Review Mode (Bypass Auth)
+            </button>
+          </div>
+          <div className="mt-4 text-[10px] font-bold text-brand-muted uppercase tracking-[0.2em] opacity-40">
+            Sign in with Google to begin or use Review Mode locally
           </div>
         </motion.div>
       </main>
