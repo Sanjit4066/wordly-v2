@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Search, Sparkles, TrendingUp, ArrowRight, BookOpen, Loader2, Clock, CheckCircle2, XCircle } from 'lucide-react';
@@ -22,7 +22,63 @@ const Practice: React.FC = () => {
 
   useEffect(() => {
     loadRequests();
+
+    // Set up timer to refresh requests automatically at 11:55 PM
+    let timeoutId: any;
+    
+    const scheduleRefresh = () => {
+      const now = new Date();
+      const target = new Date(now);
+      target.setHours(23, 55, 0, 0);
+      
+      if (now.getTime() >= target.getTime()) {
+        target.setDate(target.getDate() + 1);
+      }
+      
+      const delay = target.getTime() - now.getTime();
+      
+      timeoutId = setTimeout(() => {
+        loadRequests();
+        scheduleRefresh(); // Schedule the next rollover
+      }, delay);
+    };
+
+    scheduleRefresh();
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, []);
+
+  // Filter requests to show only those in the current day's window (rollover at 11:55 PM)
+  const currentDayRequests = useMemo(() => {
+    const now = new Date();
+    
+    // Calculate 11:55 PM of today in local time
+    const today1155 = new Date(now);
+    today1155.setHours(23, 55, 0, 0);
+
+    let start: Date;
+    let end: Date;
+
+    if (now.getTime() >= today1155.getTime()) {
+      start = today1155;
+      end = new Date(today1155);
+      end.setDate(end.getDate() + 1);
+    } else {
+      start = new Date(today1155);
+      start.setDate(start.getDate() - 1);
+      end = today1155;
+    }
+
+    return requests.filter((req) => {
+      if (!req.createdAt) return false;
+      const reqDate = new Date(req.createdAt);
+      return reqDate.getTime() >= start.getTime() && reqDate.getTime() < end.getTime();
+    });
+  }, [requests]);
 
   const suggestions = [
     { word: 'ephemeral', mood: 'poetic' },
@@ -134,14 +190,19 @@ const Practice: React.FC = () => {
         </div>
       </section>
 
-      {requests.length > 0 && (
+      {currentDayRequests.length > 0 && (
         <section className="space-y-8 pt-8 border-t border-brand-border">
-          <h5 className="technical-label flex items-center gap-2">
-            <Clock className="w-4 h-4 text-brand-accent" />
-            Your Requested Words
-          </h5>
+          <div className="flex items-center justify-between">
+            <h5 className="technical-label flex items-center gap-2">
+              <Clock className="w-4 h-4 text-brand-accent" />
+              Your Requested Words
+            </h5>
+            <span className="text-[10px] text-brand-muted uppercase tracking-wider font-mono">
+              Resets at 11:55 PM daily
+            </span>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {requests.map((req) => (
+            {currentDayRequests.map((req) => (
               <div key={req._id} className="p-4 bg-white dark:bg-brand-surface border border-brand-border rounded-2xl flex items-center justify-between">
                 <span className="font-serif italic font-bold text-brand-primary lowercase">{req.word}</span>
                 {req.status === 'pending' && <Clock className="w-4 h-4 text-amber-500" />}
