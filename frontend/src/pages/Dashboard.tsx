@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Trophy, Flame, BookOpen, TrendingUp,
   Volume2, CheckCircle2, ArrowRight,
@@ -11,7 +11,7 @@ import { LEVEL_COLORS } from '../utils/colors';
 import {
   getDailyWord, getYesterdayWord, submitSelfMark, saveSentence,
   getSentences, getStreak, getMastery, getNotificationCount,
-  markNotificationsRead, getNotifications, markMastery
+  markNotificationsRead, getNotifications, markMastery, getWordsByMastery
 } from '../services/api';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -97,9 +97,11 @@ const Dashboard: React.FC = () => {
   const [showNotifs, setShowNotifs] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showLevelMenu, setShowLevelMenu] = useState(false);
-  // For manually marking mastery
   const [wordMastery, setWordMastery] = useState<string | null>(null);
   const [markingMastery, setMarkingMastery] = useState(false);
+  const [expandedStat, setExpandedStat] = useState<string | null>(null);
+  const [expandedWords, setExpandedWords] = useState<string[]>([]);
+  const [loadingExpanded, setLoadingExpanded] = useState(false);
 
   const dailyQuote = getDailyQuote();
   const initialized = useRef(false);
@@ -254,6 +256,26 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleStatClick = async (statId: string) => {
+    if (statId === 'streak') return;
+    
+    if (expandedStat === statId) {
+      setExpandedStat(null);
+      return;
+    }
+    
+    setExpandedStat(statId);
+    setLoadingExpanded(true);
+    try {
+      const res = await getWordsByMastery(statId);
+      setExpandedWords(res.words || []);
+    } catch (err) {
+      toast.error('Failed to load words.');
+    } finally {
+      setLoadingExpanded(false);
+    }
+  };
+
   const playAudio = (term: string) => {
     const utterance = new SpeechSynthesisUtterance(term);
     utterance.rate = 0.8;
@@ -277,19 +299,69 @@ const Dashboard: React.FC = () => {
   }
 
   const statsRow = (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {[
-        { label: 'Streak', value: `${streak} days`, icon: Flame, color: 'text-orange-500' },
-        { label: 'Mastered', value: mastery.mastered || 0, icon: Trophy, color: 'text-brand-accent' },
-        { label: 'Familiar', value: mastery.familiar || 0, icon: BookOpen, color: 'text-blue-500' },
-        { label: 'Practiced', value: mastery.practiced || 0, icon: TrendingUp, color: 'text-green-500' },
-      ].map((stat) => (
-        <div key={stat.label} className="card p-6 space-y-2">
-          <stat.icon className={`w-5 h-5 ${stat.color}`} />
-          <p className="text-2xl font-serif font-black italic">{stat.value}</p>
-          <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">{stat.label}</p>
-        </div>
-      ))}
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { id: 'streak', label: 'Streak', value: `${streak} days`, icon: Flame, color: 'text-orange-500' },
+          { id: 'mastered', label: 'Mastered', value: mastery.mastered || 0, icon: Trophy, color: 'text-brand-accent' },
+          { id: 'familiar', label: 'Familiar', value: mastery.familiar || 0, icon: BookOpen, color: 'text-blue-500' },
+          { id: 'practiced', label: 'Practiced', value: mastery.practiced || 0, icon: TrendingUp, color: 'text-green-500' },
+        ].map((stat) => {
+          const isClickable = stat.id !== 'streak';
+          const isActive = expandedStat === stat.id;
+          return (
+            <div 
+              key={stat.label} 
+              onClick={() => isClickable && handleStatClick(stat.id)}
+              className={`card p-6 space-y-2 transition-all ${isClickable ? 'cursor-pointer hover:-translate-y-1 hover:shadow-xl active:translate-y-0' : ''} ${isActive ? 'ring-2 ring-brand-accent shadow-xl bg-brand-accent/5' : ''}`}
+            >
+              <stat.icon className={`w-5 h-5 ${stat.color}`} />
+              <p className="text-2xl font-serif font-black italic">{stat.value}</p>
+              <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">{stat.label}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <AnimatePresence>
+        {expandedStat && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="card p-8 space-y-4 relative">
+              <div className="flex items-center justify-between">
+                <h4 className="technical-label">
+                  {expandedStat.charAt(0).toUpperCase() + expandedStat.slice(1)} Words
+                </h4>
+                <button onClick={() => setExpandedStat(null)} className="text-[10px] font-bold uppercase text-brand-muted hover:text-brand-primary tracking-widest">Close ✕</button>
+              </div>
+              
+              {loadingExpanded ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 className="w-6 h-6 text-brand-accent animate-spin" />
+                </div>
+              ) : expandedWords.length === 0 ? (
+                <p className="text-sm font-serif italic text-brand-muted py-4">No words in this category yet.</p>
+              ) : (
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {expandedWords.map((word) => (
+                    <Link 
+                      key={word} 
+                      to={`/word/${word}`}
+                      className="px-4 py-2 bg-white dark:bg-brand-surface rounded-xl border border-brand-border text-sm font-bold text-brand-primary hover:border-brand-accent hover:text-brand-accent transition-colors shadow-sm"
+                    >
+                      {word}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 

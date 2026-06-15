@@ -166,6 +166,11 @@ export async function getMastery() {
   return res.json();
 }
 
+export async function getWordsByMastery(level: string) {
+  const res = await fetch(`${BASE}/progress/words/${level}`, { headers: headers() });
+  return res.json();
+}
+
 export async function markMastery(wordId: string, masteryLevel: 'seen' | 'practiced' | 'familiar' | 'mastered') {
   const res = await fetch(`${BASE}/progress/mark`, {
     method: 'POST',

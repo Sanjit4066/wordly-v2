@@ -85,6 +85,31 @@ router.get('/mastery', async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/progress/words/:level — get words for a specific mastery level
+router.get('/words/:level', async (req: Request, res: Response) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) return res.status(401).json({ error: 'User ID required' });
+
+    const { level } = req.params;
+    const validLevels = ['seen', 'practiced', 'familiar', 'mastered'];
+    if (!validLevels.includes(level)) {
+      return res.status(400).json({ error: 'Invalid mastery level' });
+    }
+
+    const entries = await UserProgress.find(
+      { userId, masteryLevel: level },
+      'wordId seenAt'
+    ).sort({ seenAt: -1 });
+
+    const words = entries.map(e => e.wordId);
+    
+    res.json({ words });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // POST /api/progress/mark — manually set a word's mastery level
 router.post('/mark', async (req: Request, res: Response) => {
   try {
