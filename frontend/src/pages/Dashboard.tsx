@@ -13,7 +13,7 @@ import {
   getSentences, getStreak, getMastery, getNotificationCount,
   markNotificationsRead, getNotifications, markMastery, getWordsByMastery
 } from '../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 // ── Daily quote — wide variety of inspiring categories ─────────────────────
@@ -63,6 +63,7 @@ function getDailyQuote() {
 
 const Dashboard: React.FC = () => {
   const { profile, updateDifficulty } = useAuth();
+  const navigate = useNavigate();
 
   const [todayWord, setTodayWord] = useState<any>(() => {
     const cached = sessionStorage.getItem('wordly_today_word');
@@ -197,7 +198,11 @@ const Dashboard: React.FC = () => {
       setSelfMark(mark);
       toast.success(mark === 'got_it' ? '✅ Great recall!' : '📚 Keep practicing!');
       setTimeout(() => {
-        setPhase('DISCOVERY');
+        if (mark === 'needs_practice') {
+          navigate(`/word/${yesterdayWord.word}`);
+        } else {
+          setPhase('DISCOVERY');
+        }
       }, 1200);
     } catch (err) {
       toast.error('Failed to submit. Try again.');
