@@ -20,6 +20,7 @@ import { startBatchWordProcessor } from './cron/batchWordProcessor';
 import { startQuizGenerator } from './cron/quizGenerator';
 import { startSpacedRepetitionReminder } from './cron/spacedRepetitionReminder';
 import { startDailyDictionaryExpander } from './cron/dailyDictionaryExpander';
+import { startKeepAlive } from './cron/keepAlive';
 
 // (dotenv.config() moved to top of file)
 const app = express();
@@ -73,6 +74,7 @@ async function bootstrap() {
     });
 
     // Start all cron jobs
+    startKeepAlive();                    // Every 14 mins  — keep backend awake on free tiers
     startBatchWordProcessor();           // 11:55 PM daily  — user-requested word batch processing
     startQuizGenerator();                // 11:00 PM Monday — weekly quiz generation
     startSpacedRepetitionReminder();     //  9:00 AM daily  — spaced repetition reminders
