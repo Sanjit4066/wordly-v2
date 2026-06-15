@@ -211,6 +211,79 @@ async function waitForUserRequestsToFinish(): Promise<void> {
   console.warn('⚠️  [Expander] Timed out waiting for user requests. Proceeding anyway.');
 }
 
+async function getBalancedWordsToProcess(
+  existingSet: Set<string>,
+  batchSize: number
+): Promise<string[]> {
+  // Group master lists by target level, filtering out already existing words
+  const remainingByLevel: Record<DifficultyLevel, string[]> = {
+    beginner: MASTER_WORD_LIST.slice(0, 334).map((w) => w.toLowerCase().trim()).filter((w) => !existingSet.has(w)),
+    intermediate: MASTER_WORD_LIST.slice(334, 610).map((w) => w.toLowerCase().trim()).filter((w) => !existingSet.has(w)),
+    advanced: MASTER_WORD_LIST.slice(610, 850).map((w) => w.toLowerCase().trim()).filter((w) => !existingSet.has(w)),
+    expert: MASTER_WORD_LIST.slice(850, 1210).map((w) => w.toLowerCase().trim()).filter((w) => !existingSet.has(w)),
+  };
+
+  // Shuffle remaining arrays internally so selection is still randomized/distributed
+  const levels: DifficultyLevel[] = ['beginner', 'intermediate', 'advanced', 'expert'];
+  levels.forEach((level) => {
+    remainingByLevel[level].sort(() => Math.random() - 0.5);
+  });
+
+  // Get current database counts for each difficulty level
+  const stats = await Word.aggregate([
+    { $group: { _id: '$level', count: { $sum: 1 } } },
+  ]);
+
+  const currentCounts: Record<DifficultyLevel, number> = {
+    beginner: 0,
+    intermediate: 0,
+    advanced: 0,
+    expert: 0,
+  };
+  stats.forEach((s) => {
+    if (s._id) {
+      currentCounts[s._id as DifficultyLevel] = s.count;
+    }
+  });
+
+  console.log('📊 [Expander] Current database counts before balancing:', currentCounts);
+
+  const toProcess: string[] = [];
+  const tempCounts = { ...currentCounts };
+
+  while (toProcess.length < batchSize) {
+    let bestLevel: DifficultyLevel | null = null;
+    let minCount = Infinity;
+
+    for (const level of levels) {
+      if (remainingByLevel[level].length > 0 && tempCounts[level] < minCount) {
+        minCount = tempCounts[level];
+        bestLevel = level;
+      }
+    }
+
+    if (!bestLevel) {
+      break; // No more words remaining in any level of the master list
+    }
+
+    const word = remainingByLevel[bestLevel].pop()!;
+    toProcess.push(word);
+    tempCounts[bestLevel]++;
+  }
+
+  // Log what levels we picked to process in this run
+  const pickedBreakdown = { beginner: 0, intermediate: 0, advanced: 0, expert: 0 };
+  toProcess.forEach((w) => {
+    if (MASTER_WORD_LIST.slice(0, 334).includes(w)) pickedBreakdown.beginner++;
+    else if (MASTER_WORD_LIST.slice(334, 610).includes(w)) pickedBreakdown.intermediate++;
+    else if (MASTER_WORD_LIST.slice(610, 850).includes(w)) pickedBreakdown.advanced++;
+    else if (MASTER_WORD_LIST.slice(850, 1210).includes(w)) pickedBreakdown.expert++;
+  });
+  console.log('⚖️ [Expander] Balanced batch selection breakdown for this run:', pickedBreakdown);
+
+  return toProcess;
+}
+
 // ─── CORE EXPANSION LOGIC ─────────────────────────────────────────────────────
 
 async function runDailyExpansion(): Promise<void> {
@@ -223,15 +296,11 @@ async function runDailyExpansion(): Promise<void> {
   // Step 1: Let user-requested word processing finish first
   await waitForUserRequestsToFinish();
 
-  // Step 2: Find words from master list not yet in the dictionary
+  // Step 2: Find words from master list not yet in the dictionary (balanced across levels)
   const existingWords = await Word.distinct('word');
   const existingSet   = new Set<string>(existingWords);
 
-  const toProcess = MASTER_WORD_LIST
-    .map((w) => w.toLowerCase().trim())
-    .filter((w) => !existingSet.has(w))
-    .sort(() => Math.random() - 0.5) // Shuffle to ensure even distribution across all levels
-    .slice(0, BATCH_SIZE);
+  const toProcess = await getBalancedWordsToProcess(existingSet, BATCH_SIZE);
 
   if (toProcess.length === 0) {
     console.log('✅ [Expander] All master-list words are already in the dictionary!');
