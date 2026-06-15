@@ -107,20 +107,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 top-14 bg-white dark:bg-brand-surface border-2 border-brand-accent/30 dark:border-brand-accent/40 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] ring-4 ring-brand-accent/5 z-50 p-4 w-64 space-y-4"
+                  className="absolute right-0 top-14 bg-white dark:bg-brand-surface border-2 border-brand-accent/20 dark:border-brand-accent/30 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] ring-4 ring-brand-accent/5 z-50 p-5 w-64 space-y-4"
                 >
-                  <div className="border-b border-brand-border pb-3 space-y-1.5">
-                    <p className="text-sm font-bold truncate text-brand-primary">{profile?.displayName}</p>
+                  <div className="border-b border-brand-border pb-3 space-y-1">
+                    <p className="text-base font-serif font-black italic text-brand-primary truncate">{profile?.displayName}</p>
                     {user?.email && (
-                      <p className="text-[10px] font-mono text-brand-muted truncate">{user.email}</p>
+                      <p className="text-xs text-brand-muted truncate font-sans">{user.email}</p>
                     )}
                     
                     {/* Collapsible Bio */}
                     <div className="mt-1">
                       {profile?.bio ? (
                         showFullBio ? (
-                          <div className="space-y-1 bg-brand-bg/50 dark:bg-brand-surface/50 p-2 rounded-xl border border-brand-border/40">
-                            <p className="text-[10px] text-brand-muted font-serif italic whitespace-pre-wrap leading-relaxed">
+                          <div className="space-y-1 bg-brand-bg/50 dark:bg-brand-surface/50 p-2.5 rounded-xl border border-brand-border/40">
+                            <p className="text-xs text-brand-muted font-serif italic whitespace-pre-wrap leading-relaxed">
                               {profile.bio}
                             </p>
                             <button
@@ -128,14 +128,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                 e.stopPropagation();
                                 setShowFullBio(false);
                               }}
-                              className="text-[9px] font-bold text-brand-accent hover:underline cursor-pointer focus:outline-none"
+                              className="text-[10px] font-bold text-brand-accent hover:underline cursor-pointer focus:outline-none"
                             >
                               Hide Bio
                             </button>
                           </div>
                         ) : (
                           <div className="flex items-center gap-1.5 justify-between">
-                            <p className="text-[10px] text-brand-muted font-serif italic truncate flex-1">
+                            <p className="text-xs text-brand-muted font-serif italic truncate flex-1">
                               {profile.bio}
                             </p>
                             <button
@@ -143,44 +143,46 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                 e.stopPropagation();
                                 setShowFullBio(true);
                               }}
-                              className="text-[9px] font-bold text-brand-accent hover:underline shrink-0 cursor-pointer focus:outline-none"
+                              className="text-[10px] font-bold text-brand-accent hover:underline shrink-0 cursor-pointer focus:outline-none"
                             >
                               See Bio
                             </button>
                           </div>
                         )
                       ) : (
-                        <p className="text-[10px] text-brand-muted/50 font-serif italic">No bio yet.</p>
+                        <p className="text-xs text-brand-muted/40 font-serif italic">No bio yet.</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <Link
                       to="/profile"
                       onClick={() => setShowDropdown(false)}
-                      className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-brand-muted hover:text-brand-primary hover:bg-brand-bg transition-all"
+                      className="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-brand-muted hover:text-brand-primary hover:bg-brand-bg transition-all"
                     >
                       <span>View Profile</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </Link>
 
                     {/* CONNECT ME Submenu */}
-                    <div className="space-y-2 pt-2 border-t border-brand-border">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-brand-muted px-3">Connect Me</p>
-                      <div className="flex justify-around py-1 bg-brand-bg dark:bg-brand-surface rounded-xl border border-brand-border">
+                    <div className="space-y-2 pt-3 border-t border-brand-border">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-brand-muted/70 px-1">Connect Me</p>
+                      <div className="flex justify-center gap-3 pt-1">
                         {profile?.githubId ? (
                           <a
                             href={`https://github.com/${profile.githubId}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2 text-[#24292e] dark:text-zinc-200 hover:text-black dark:hover:text-white transition-colors"
+                            className="w-8 h-8 rounded-full flex items-center justify-center bg-[#24292e] text-white hover:bg-black transition-all shadow-sm"
                             title={`GitHub: @${profile.githubId}`}
                           >
                             <Github className="w-4 h-4" />
                           </a>
                         ) : (
-                          <span className="p-2 text-brand-muted/20 cursor-not-allowed"><Github className="w-4 h-4" /></span>
+                          <span className="w-8 h-8 rounded-full flex items-center justify-center border border-brand-border bg-brand-bg text-brand-muted/20 cursor-not-allowed" title="No GitHub Connected">
+                            <Github className="w-4 h-4" />
+                          </span>
                         )}
 
                         {profile?.linkedinId ? (
@@ -188,13 +190,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             href={profile.linkedinId.startsWith('http') ? profile.linkedinId : `https://linkedin.com/in/${profile.linkedinId}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2 text-[#0077b5] hover:text-[#005987] transition-colors"
+                            className="w-8 h-8 rounded-full flex items-center justify-center bg-[#0077b5] text-white hover:bg-[#005987] transition-all shadow-sm"
                             title="LinkedIn"
                           >
                             <Linkedin className="w-4 h-4" />
                           </a>
                         ) : (
-                          <span className="p-2 text-brand-muted/20 cursor-not-allowed"><Linkedin className="w-4 h-4" /></span>
+                          <span className="w-8 h-8 rounded-full flex items-center justify-center border border-brand-border bg-brand-bg text-brand-muted/20 cursor-not-allowed" title="No LinkedIn Connected">
+                            <Linkedin className="w-4 h-4" />
+                          </span>
                         )}
 
                         {profile?.instagramId ? (
@@ -202,13 +206,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             href={`https://instagram.com/${profile.instagramId}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2 text-[#ee2a7b] hover:text-[#c13584] transition-colors"
+                            className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white hover:brightness-110 transition-all shadow-sm"
                             title={`Instagram: @${profile.instagramId}`}
                           >
                             <Instagram className="w-4 h-4" />
                           </a>
                         ) : (
-                          <span className="p-2 text-brand-muted/20 cursor-not-allowed"><Instagram className="w-4 h-4" /></span>
+                          <span className="w-8 h-8 rounded-full flex items-center justify-center border border-brand-border bg-brand-bg text-brand-muted/20 cursor-not-allowed" title="No Instagram Connected">
+                            <Instagram className="w-4 h-4" />
+                          </span>
                         )}
                       </div>
                     </div>
@@ -219,7 +225,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       setShowDropdown(false);
                       logout();
                     }}
-                    className="w-full text-left px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                    className="w-full text-left px-3 py-2.5 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     Sign Out
