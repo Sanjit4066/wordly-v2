@@ -77,7 +77,7 @@ async function bootstrap() {
 
     // Start all cron jobs
     startKeepAlive();                    // Every 14 mins  — keep backend awake on free tiers
-    startBatchWordProcessor();           // 11:55 PM daily  — user-requested word batch processing
+    startBatchWordProcessor();           //  4:00 AM daily  — user-requested word batch processing
     startQuizGenerator();                // 11:00 PM Monday — weekly quiz generation
     startSpacedRepetitionReminder();     //  9:00 AM daily  — spaced repetition reminders
     startDailyDictionaryExpander();      //  5:00 AM EST    — autonomous 1000-word dictionary expansion

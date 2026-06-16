@@ -30,13 +30,13 @@ import { DifficultyLevel } from '../models/Dictionary';
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 const BATCH_SIZE = 600;       // max words to process per daily run (20 reqs * 30 words = 600)
 const CHUNK_SIZE = 30;        // words per single Gemini AI call
-const DELAY_MS   = 10000;     // ms between each chunk (rate limiting)
+const DELAY_MS   = 15000;     // ms between each chunk (rate limiting to 4 RPM)
 const MAX_PENDING_WAIT_MS = 10 * 60 * 1000; // wait up to 10 min for user-requests to clear
 
 // ─── MASTER WORD LIST ────────────────────────────────────────────────────────
 // 1000+ curated English words across all difficulty levels.
 // Words already in the dictionary are automatically skipped.
-const MASTER_WORD_LIST: string[] = [
+export const MASTER_WORD_LIST: string[] = [
   // ── BEGINNER ──────────────────────────────────────────────────────────────
   'able','accept','act','add','afraid','after','again','age','ago','agree',
   'air','all','allow','also','always','angry','animal','answer','any','area',
@@ -195,20 +195,20 @@ async function waitForUserRequestsToFinish(): Promise<void> {
   const deadline = Date.now() + MAX_PENDING_WAIT_MS;
 
   while (Date.now() < deadline) {
-    const pendingCount = await WordRequest.countDocuments({
-      status: { $in: ['pending', 'processing'] },
+    const processingCount = await WordRequest.countDocuments({
+      status: 'processing',
     });
 
-    if (pendingCount === 0) {
-      console.log('✅ [Expander] No pending user requests — starting daily expansion.');
+    if (processingCount === 0) {
+      console.log('✅ [Expander] No active user request processing — starting daily expansion.');
       return;
     }
 
-    console.log(`⏳ [Expander] ${pendingCount} user request(s) still processing. Waiting 30s...`);
+    console.log(`⏳ [Expander] ${processingCount} user request(s) still actively processing. Waiting 30s...`);
     await delay(pollInterval);
   }
 
-  console.warn('⚠️  [Expander] Timed out waiting for user requests. Proceeding anyway.');
+  console.warn('⚠️  [Expander] Timed out waiting for active user requests. Proceeding anyway.');
 }
 
 async function getBalancedWordsToProcess(

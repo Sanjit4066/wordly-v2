@@ -29,7 +29,7 @@ const Practice: React.FC = () => {
     const scheduleRefresh = () => {
       const now = new Date();
       const target = new Date(now);
-      target.setHours(23, 55, 0, 0);
+      target.setHours(4, 0, 0, 0);
       
       if (now.getTime() >= target.getTime()) {
         target.setDate(target.getDate() + 1);
@@ -52,25 +52,25 @@ const Practice: React.FC = () => {
     };
   }, []);
 
-  // Filter requests to show only those in the current day's window (rollover at 11:55 PM)
+  // Filter requests to show only those in the current day's window (rollover at 4:00 AM)
   const currentDayRequests = useMemo(() => {
     const now = new Date();
     
-    // Calculate 11:55 PM of today in local time
-    const today1155 = new Date(now);
-    today1155.setHours(23, 55, 0, 0);
+    // Calculate 4:00 AM of today in local time
+    const today0400 = new Date(now);
+    today0400.setHours(4, 0, 0, 0);
 
     let start: Date;
     let end: Date;
 
-    if (now.getTime() >= today1155.getTime()) {
-      start = today1155;
-      end = new Date(today1155);
+    if (now.getTime() >= today0400.getTime()) {
+      start = today0400;
+      end = new Date(today0400);
       end.setDate(end.getDate() + 1);
     } else {
-      start = new Date(today1155);
+      start = new Date(today0400);
       start.setDate(start.getDate() - 1);
-      end = today1155;
+      end = today0400;
     }
 
     return requests.filter((req) => {
@@ -178,7 +178,7 @@ const Practice: React.FC = () => {
             {[
               { step: '01', text: 'Search any English word above' },
               { step: '02', text: 'If found in dictionary → see full details instantly' },
-              { step: '03', text: 'If not found → queued for AI processing at 11:55 PM' },
+              { step: '03', text: 'If not found → queued for AI processing at 4:00 AM' },
               { step: '04', text: 'Next day → word is in the dictionary with difficulty level' },
             ].map((item) => (
               <div key={item.step} className="flex items-center gap-4 p-4 bg-white dark:bg-brand-surface rounded-2xl border border-brand-border">
@@ -198,7 +198,7 @@ const Practice: React.FC = () => {
               Your Requested Words
             </h5>
             <span className="text-[10px] text-brand-muted uppercase tracking-wider font-mono">
-              Resets at 11:55 PM daily
+              Resets at 4:00 AM daily
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
