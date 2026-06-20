@@ -36,137 +36,7 @@ const MAX_PENDING_WAIT_MS = 10 * 60 * 1000; // wait up to 10 min for user-reques
 // ─── MASTER WORD LIST ────────────────────────────────────────────────────────
 // 1000+ curated English words across all difficulty levels.
 // Words already in the dictionary are automatically skipped.
-export const MASTER_WORD_LIST: string[] = [
-  // ── BEGINNER ──────────────────────────────────────────────────────────────
-  'able','accept','act','add','afraid','after','again','age','ago','agree',
-  'air','all','allow','also','always','angry','animal','answer','any','area',
-  'ask','baby','back','bad','bag','ball','bank','base','bath','bear',
-  'beat','become','begin','believe','belong','best','big','bird','black','block',
-  'blood','blow','blue','body','book','born','both','box','boy','break',
-  'bring','brother','build','burn','buy','call','care','carry','catch','cause',
-  'change','cheap','check','child','city','class','clean','clear','climb','close',
-  'cold','come','cook','cool','copy','cost','count','cover','cry','cut',
-  'dark','day','dead','deal','deep','deny','describe','die','different','difficult',
-  'dirt','door','draw','dream','drink','drive','drop','dry','each','early',
-  'earn','easy','eat','end','enter','even','every','example','face','fact',
-  'fail','fall','family','far','fast','fat','feel','few','fight','find',
-  'finish','fire','fish','fix','fly','follow','food','forget','form','found',
-  'free','friend','full','fun','game','get','give','glad','good','great',
-  'green','grow','guess','hand','hang','hard','hate','have','head','hear',
-  'heart','heat','help','high','hold','home','hope','hot','house','hurt',
-  'idea','important','include','increase','inside','interest','jump','keep','kill','kind',
-  'know','large','last','late','laugh','lay','lead','learn','leave','left',
-  'let','life','lift','light','like','list','listen','little','live','long',
-  'look','lose','lot','love','low','make','man','many','mark','matter',
-  'mean','meet','mind','miss','mix','money','month','more','move','much',
-  'need','never','next','nice','night','north','note','offer','often','once',
-  'open','order','other','over','own','pain','pass','pay','people','pick',
-  'place','plan','play','point','power','put','quick','quiet','rain','raise',
-  'reach','read','ready','real','rest','right','rise','road','round','rule',
-  'run','safe','same','save','say','see','seem','send','set','show',
-  'side','sit','size','sky','sleep','slow','small','smell','smile','snow',
-  'soft','some','soon','sorry','south','speak','stand','start','stay','still',
-  'stop','strong','study','sun','sure','swim','take','talk','teach','tell',
-  'think','throw','time','tired','together','touch','town','travel','tree','try',
-  'turn','type','under','use','wait','walk','want','warm','wash','watch',
-  'water','weak','wear','week','well','west','what','when','where','which',
-  'while','wide','win','wind','wish','wonder','word','work','world','worry',
-  'write','wrong','year','young',
-
-  // ── INTERMEDIATE ──────────────────────────────────────────────────────────
-  'abandon','abstract','achieve','acknowledge','acquire','adapt','adequate','adjacent','adjust','admire',
-  'adopt','advance','advantage','adventure','advocate','affect','afford','aggressive','alert','allocate',
-  'alter','ambition','analyze','ancient','announce','anticipate','apparent','appreciate','approach','appropriate',
-  'approve','argue','arrange','assess','assign','assist','assume','attach','attempt','attract',
-  'available','average','aware','balance','barrier','benefit','bias','boundary','capable','capture',
-  'challenge','character','charge','choice','circumstance','claim','classify','collaborate','comment','commit',
-  'communicate','compare','compete','complex','concentrate','concern','conclude','conflict','connect','consequence',
-  'consider','consistent','constant','construct','contribute','control','convince','cooperate','coordinate','creative',
-  'decline','define','delay','deliver','demonstrate','depend','develop','direct','discover','discuss',
-  'display','distribute','disturb','diverse','dominant','dramatic','economic','effective','efficient','eliminate',
-  'emerge','emphasize','enable','encourage','engage','enhance','enormous','establish','evaluate','evident',
-  'evolve','examine','exclude','expand','experience','explain','explore','expose','express','extend',
-  'factor','feature','flexible','focus','formal','foundation','generate','global','guide','identify',
-  'ignore','impact','implement','imply','improve','indicate','individual','influence','inform','initiative',
-  'innovate','insist','inspire','integrate','intense','involve','isolate','justify','logical','maintain',
-  'manage','maximize','measure','mental','method','minimize','monitor','motivate','negotiate','numerous',
-  'objective','observe','obtain','obvious','occur','operate','organize','overcome','participate','perceive',
-  'perform','permit','persist','positive','potential','practical','predict','prepare','prevent','primary',
-  'process','produce','professional','promote','propose','protect','provide','pursue','qualify','recognize',
-  'reduce','reflect','relate','relevant','require','resolve','respond','restrict','retain','reveal',
-  'review','revise','significant','similar','situation','solution','specify','stable','strategy','strengthen',
-  'structure','submit','succeed','suggest','summarize','support','sustain','target','technique','temporary',
-  'tendency','theory','transform','transition','transmit','trend','unique','update','utilize','validate',
-  'vary','version','virtual','visible','voluntary','vulnerable','widespread','withdraw','witness','worthwhile',
-  'accelerate','accumulate','accurate','activate','acute','adamant','adhere','affluent','articulate','authentic',
-  'coherent','collaborative','compassionate','competent','comprehensive','confident','conscientious','conservative',
-  'conventional','cooperative','courageous','creative','critical','decisive','dedicated','determined','diplomatic',
-  'disciplined','dynamic','empathetic','enthusiastic','flexible','genuine','innovative','intellectual','methodical',
-
-  // ── ADVANCED ──────────────────────────────────────────────────────────────
-  'aberrant','abstruse','acrimony','acumen','adumbrate','aesthetic','affectation','aggrandize','alacrity','alienate',
-  'allegory','alleviate','altruism','amalgamate','ambivalent','ameliorate','anachronism','anarchy','anecdote','anomaly',
-  'antagonist','antipathy','apathy','apprehension','arcane','arduous','ascertain','assertion','assiduous','atrophy',
-  'audacious','austere','authentic','avarice','aversion','axiom','benevolent','bombastic','brevity','bureaucracy',
-  'callous','candid','capitulate','catalyst','caustic','charisma','chronological','circumspect','clandestine','coerce',
-  'cognizant','cohesive','compelling','complacent','comprehensive','concise','condescend','convoluted','copious','corroborate',
-  'credible','cryptic','culminate','cynical','debilitate','decipher','deficient','deliberate','delineate','demeaning',
-  'deplore','derogatory','despondent','diligent','discrepancy','disdain','disparate','dissent','divergent','eccentric',
-  'elaborate','eloquent','emulate','enigmatic','ephemeral','equivocal','eradicate','erroneous','esoteric','euphemism',
-  'exacerbate','exorbitant','expedient','explicit','exuberant','fabricate','fallacious','fastidious','fervent','formidable',
-  'forthright','frugal','futile','grandiose','gregarious','hamper','haphazard','hegemony','hierarchy','hypocrite',
-  'hypothetical','ideological','imminent','impartial','impeccable','implicit','incisive','incongruous','indifferent','indignant',
-  'indolent','inevitable','infallible','inherent','insinuate','integrity','intrinsic','intuitive','ironic','laconic',
-  'latent','lethargic','lucid','malevolent','meticulous','mitigate','myopic','nonchalant','nostalgic','notorious',
-  'nuanced','oblivious','ominous','opaque','optimistic','ostentatious','paradox','partisan','passive','patronize',
-  'pedantic','pensive','pervasive','pessimistic','poignant','pragmatic','precarious','pretentious','prodigious','profound',
-  'prolific','provocative','prudent','radiant','rationalize','reticent','rhetoric','rigorous','sarcastic','scrutinize',
-  'serendipity','shrewd','skeptical','sophisticated','speculation','stoic','subjective','subtle','superficial','surplus',
-  'sustainable','sympathetic','tangible','tenacious','theoretical','trivial','turbulent','ubiquitous','undermine','unequivocal',
-  'unprecedented','vague','venerate','verbose','versatile','vindicate','volatile','zealous','admonish','adversarial',
-  'affinity','aloof','altercation','amicable','anachronistic','apocryphal','arbitrary','ardor','ascetic','bellicose',
-  'benefactor','blithe','boorish','bravado','bucolic','burgeon','capricious','censure','chagrin','chicanery',
-  'clairvoyant','clemency','cognition','commensurate','compunction','conciliatory','condone','congenial','contentious','contrite',
-  'culpable','dauntless','debonair','decorum','deferential','deft','deleterious','demagogue','denigrate','depravity',
-
-  // ── EXPERT ────────────────────────────────────────────────────────────────
-  'abeyance','abnegate','abscond','abstemious','accretion','acerbic','adamantine','aegis','afflatus','aggrandizement',
-  'agonistic','aleatoric','amanuensis','ameliorate','analeptic','anamnesis','anfractuous','animadversion','antinomy','apocryphal',
-  'apodictic','apogee','apophenia','apotheosis','apriorism','apposite','arabesque','arrogate','asperity','atavism',
-  'atrabilious','autodidact','axiological','bathetic','brachylogy','cachinnate','calumny','casuistry','catachresis','chimerical',
-  'clerisy','cognoscenti','concomitant','consanguinity','contumacious','cosmogony','cupidity','defalcation','defenestration','demiurge',
-  'deracinate','desideratum','diatribe','didactic','dilettante','discomfit','discursive','disingenuous','dissimulate','dogmatic',
-  'ebullient','effrontery','egregious','elegy','elision','emollient','empiricism','encomium','endemic','enervate',
-  'ennui','episteme','equanimity','equivocate','erudite','eschatology','etiolate','etymology','eudaimonia','eulogize',
-  'euphony','excoriate','execrate','exegesis','exiguous','expatiate','expiate','expunge','extirpate','fatuous',
-  'felicitous','filibuster','flagitious','fulminate','garrulous','genuflect','grandiloquent','hagiography','harbinger','hermeneutics',
-  'heterodox','heuristic','hubris','hypostasis','iconoclast','idiosyncrasy','ignominious','immutable','impecunious','imperious',
-  'impugn','inchoate','ineluctable','inexorable','inimical','iniquitous','insouciance','interpolate','interregnum','inveterate',
-  'irascible','jejune','juxtapose','lachrymose','lassitude','legerdemain','limerence','loquacious','lugubrious','machiavellian',
-  'magnanimous','malapropism','melancholia','mendacious','mercurial','metaphysical','meretricious','misanthrope','mnemonic','moribund',
-  'munificent','narcissism','neologism','nihilism','numinous','obdurate','obfuscate','obloquy','obstreperous','obsequious',
-  'occlude','oligarchy','ontology','opprobrium','ostracize','palimpsest','panacea','panegyric','paradigm','pariah',
-  'parlance','parsimonious','peccadillo','perfidious','peripatetic','peroration','perspicacious','pertinacious','petulant','phantasmagoria',
-  'philistine','polemic','positivism','postulate','pragmatism','predilection','probity','proclivity','prolix','propitious',
-  'proscribe','pulchritude','punctilious','quixotic','recalcitrant','recidivism','reification','remonstrate','reprobate','requite',
-  'ruminate','sagacious','salutary','sanctimonious','sardonic','saturnine','schadenfreude','scintilla','semiotic','senescence',
-  'sesquipedalian','sibilant','sinecure','solecism','solipsism','somnolent','sophistry','soporific','stigmatize','stolid',
-  'subjugate','sycophant','synecdoche','taciturn','tautology','tendentious','tergiversate','timorous','torpid','tortuous',
-  'transmogrify','trenchant','trepidation','truculent','turpitude','ululate','unctuous','undulate','usurp','vacuous',
-  'venal','venial','verisimilitude','vitiate','vituperate','voluble','weltanschauung','xenophobia','zeitgeist','zealotry',
-  'acedia','agnosticism','algolagnia','alieniloquy','antithesis','aphorism','apricity','ataraxia','bathos','bildungsroman',
-  'boulevardier','callipygian','camelopard','catharsis','chrysalism','compathy','conundrum','crucible','defervescence','degringolade',
-  'desiderium','diaphanous','dysphoria','echolalia','effulgent','eldritch','empirical','epiphany','eudaimonia','fernweh',
-  'filament','fugacious','gauche','hiraeth','hyaline','immanent','incandescent','ineffable','ingenue','inscrutable',
-  'iridescent','jadedness','kenopsia','lacuna','liminal','lissome','logophile','luminous','lurid','maudlin',
-  'mellifluous','mercurial','merismus','metanoia','monachopsis','myrrh','nacreous','nascent','nebulous','noctiluca',
-  'oleaginous','oneiric','opalescent','paracosm','pareidolia','parvenu','pathos','pellucid','perennial','petrichor',
-  'phosphorescent','pluviophile','poignant','polyphony','proclivity','profundity','prosaic','pyrrhic','quiescent','raconteur',
-  'recherche','redolent','refulgent','resplendent','rhapsodic','riparian','ruminant','sacrosanct','sempiternal','sensualism',
-  'sonder','soporific','stelliferous','stillicide','strident','susurrus','syzygy','tenebrous','tessellate','thalassophile',
-  'transient','tremulous','tristesse','tumult','umbrage','uncanny','undulation','vestigial','vicissitude','viridity',
-  'viridian','visceral','vivacious','vortex','wanderlust','wistful','xenial','yugen','zephyr','zenith',
-];
+export const MASTER_WORD_LIST: string[] = [];
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -211,77 +81,28 @@ async function waitForUserRequestsToFinish(): Promise<void> {
   console.warn('⚠️  [Expander] Timed out waiting for active user requests. Proceeding anyway.');
 }
 
-async function getBalancedWordsToProcess(
-  existingSet: Set<string>,
-  batchSize: number
-): Promise<string[]> {
-  // Group master lists by target level, filtering out already existing words
-  const remainingByLevel: Record<DifficultyLevel, string[]> = {
-    beginner: MASTER_WORD_LIST.slice(0, 334).map((w) => w.toLowerCase().trim()).filter((w) => !existingSet.has(w)),
-    intermediate: MASTER_WORD_LIST.slice(334, 610).map((w) => w.toLowerCase().trim()).filter((w) => !existingSet.has(w)),
-    advanced: MASTER_WORD_LIST.slice(610, 850).map((w) => w.toLowerCase().trim()).filter((w) => !existingSet.has(w)),
-    expert: MASTER_WORD_LIST.slice(850, 1210).map((w) => w.toLowerCase().trim()).filter((w) => !existingSet.has(w)),
-  };
+function classifyLevel(word: string): DifficultyLevel {
+  const len = word.length;
+  if (len <= 5) return 'beginner';
+  if (len <= 7) return 'intermediate';
+  if (len <= 9) return 'advanced';
+  return 'expert';
+}
 
-  // Shuffle remaining arrays internally so selection is still randomized/distributed
+async function getBalancedWordsToProcess(batchSize: number): Promise<string[]> {
+  const wordsPerLevel = Math.ceil(batchSize / 4);
   const levels: DifficultyLevel[] = ['beginner', 'intermediate', 'advanced', 'expert'];
-  levels.forEach((level) => {
-    remainingByLevel[level].sort(() => Math.random() - 0.5);
-  });
-
-  // Get current database counts for each difficulty level
-  const stats = await Word.aggregate([
-    { $group: { _id: '$level', count: { $sum: 1 } } },
-  ]);
-
-  const currentCounts: Record<DifficultyLevel, number> = {
-    beginner: 0,
-    intermediate: 0,
-    advanced: 0,
-    expert: 0,
-  };
-  stats.forEach((s) => {
-    if (s._id) {
-      currentCounts[s._id as DifficultyLevel] = s.count;
-    }
-  });
-
-  console.log('📊 [Expander] Current database counts before balancing:', currentCounts);
-
   const toProcess: string[] = [];
-  const tempCounts = { ...currentCounts };
 
-  while (toProcess.length < batchSize) {
-    let bestLevel: DifficultyLevel | null = null;
-    let minCount = Infinity;
-
-    for (const level of levels) {
-      if (remainingByLevel[level].length > 0 && tempCounts[level] < minCount) {
-        minCount = tempCounts[level];
-        bestLevel = level;
-      }
-    }
-
-    if (!bestLevel) {
-      break; // No more words remaining in any level of the master list
-    }
-
-    const word = remainingByLevel[bestLevel].pop()!;
-    toProcess.push(word);
-    tempCounts[bestLevel]++;
+  for (const level of levels) {
+    const levelWords = await Word.find({ isAiEnriched: false, level }, 'word')
+      .sort({ searchCount: -1 })
+      .limit(wordsPerLevel);
+    levelWords.forEach(w => toProcess.push(w.word));
   }
 
-  // Log what levels we picked to process in this run
-  const pickedBreakdown = { beginner: 0, intermediate: 0, advanced: 0, expert: 0 };
-  toProcess.forEach((w) => {
-    if (MASTER_WORD_LIST.slice(0, 334).includes(w)) pickedBreakdown.beginner++;
-    else if (MASTER_WORD_LIST.slice(334, 610).includes(w)) pickedBreakdown.intermediate++;
-    else if (MASTER_WORD_LIST.slice(610, 850).includes(w)) pickedBreakdown.advanced++;
-    else if (MASTER_WORD_LIST.slice(850, 1210).includes(w)) pickedBreakdown.expert++;
-  });
-  console.log('⚖️ [Expander] Balanced batch selection breakdown for this run:', pickedBreakdown);
-
-  return toProcess;
+  // Shuffle the resulting words to mix difficulty levels during execution
+  return toProcess.sort(() => Math.random() - 0.5).slice(0, batchSize);
 }
 
 // ─── CORE EXPANSION LOGIC ─────────────────────────────────────────────────────
@@ -296,15 +117,11 @@ async function runDailyExpansion(): Promise<void> {
   // Step 1: Let user-requested word processing finish first
   await waitForUserRequestsToFinish();
 
-  // Step 2: Find words from master list not yet in the dictionary (balanced across levels)
-  const existingWords = await Word.distinct('word');
-  const existingSet   = new Set<string>(existingWords);
-
-  const toProcess = await getBalancedWordsToProcess(existingSet, BATCH_SIZE);
+  // Step 2: Find static words in database to enrich
+  const toProcess = await getBalancedWordsToProcess(BATCH_SIZE);
 
   if (toProcess.length === 0) {
-    console.log('✅ [Expander] All master-list words are already in the dictionary!');
-    console.log('   Consider adding more words to MASTER_WORD_LIST in dailyDictionaryExpander.ts\n');
+    console.log('✅ [Expander] All words in the database are already AI-enriched!');
     return;
   }
 
@@ -329,10 +146,11 @@ async function runDailyExpansion(): Promise<void> {
     const chunk = toProcess.slice(i, i + CHUNK_SIZE);
     const progress = `[chunk ${Math.floor(i / CHUNK_SIZE) + 1}/${Math.ceil(toProcess.length / CHUNK_SIZE)}]`;
 
-    // Filter out any words that were added by another process just now
+    // Filter out any words that were added/enriched by another process in the meantime
     const chunkToProcess: string[] = [];
     for (const word of chunk) {
-      if (await Word.exists({ word })) {
+      const existsAndEnriched = await Word.exists({ word, isAiEnriched: true });
+      if (existsAndEnriched) {
         skipped++;
       } else {
         chunkToProcess.push(word);
@@ -351,17 +169,23 @@ async function runDailyExpansion(): Promise<void> {
            failed++;
            continue;
         }
-        await Word.create({
-          word:        aiData.word.toLowerCase(),
-          meaning:     aiData.meaning,
-          sentences:   aiData.sentences,
-          level:       aiData.level,
-          synonyms:    aiData.synonyms,
-          antonyms:    aiData.antonyms,
-          etymology:   aiData.etymology,
-          partOfSpeech: aiData.partOfSpeech,
-          addedVia:    'ai_batch',
-        });
+        await Word.findOneAndUpdate(
+          { word: aiData.word.toLowerCase() },
+          {
+            $set: {
+              meaning:     aiData.meaning,
+              sentences:   aiData.sentences,
+              level:       aiData.level,
+              synonyms:    aiData.synonyms,
+              antonyms:    aiData.antonyms,
+              etymology:   aiData.etymology,
+              partOfSpeech: aiData.partOfSpeech,
+              story:       aiData.story,
+              isAiEnriched: true,
+              addedVia:    'ai_batch',
+            }
+          }
+        );
 
         byLevel[aiData.level]++;
         inserted++;
@@ -409,11 +233,11 @@ async function runDailyExpansion(): Promise<void> {
   }
 
   // Remaining unprocessed words
-  const remaining = MASTER_WORD_LIST.filter((w) => !existingSet.has(w.toLowerCase())).length - toProcess.length;
+  const remaining = await Word.countDocuments({ isAiEnriched: false });
   if (remaining > 0) {
     console.log(`\n   🔜 Still in queue: ${remaining} more word(s) across future runs`);
   } else {
-    console.log('\n   🏁 All master-list words are now in the dictionary!');
+    console.log('\n   🏁 All dictionary words are now AI-enriched!');
   }
   console.log('═'.repeat(60) + '\n');
 }

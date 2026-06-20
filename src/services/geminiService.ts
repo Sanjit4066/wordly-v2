@@ -56,6 +56,7 @@ export interface AIWordData {
   antonyms: string[];
   etymology: string;
   partOfSpeech: string;
+  story: string;
 }
 
 export async function processWordWithAI(word: string): Promise<AIWordData> {
@@ -70,7 +71,8 @@ You are a vocabulary expert. Analyze the English word "${word}" and return a JSO
   "synonyms": ["up to 4 synonyms"],
   "antonyms": ["up to 4 antonyms"],
   "etymology": "brief origin/history of the word (1-2 sentences)",
-  "partOfSpeech": "noun | verb | adjective | adverb | etc."
+  "partOfSpeech": "noun | verb | adjective | adverb | etc.",
+  "story": "a short, engaging real-life story or context vignette (max 50 words) illustrating the word's usage in a natural context"
 }
 
 Level classification guide:
@@ -111,6 +113,7 @@ Return ONLY the JSON object. No markdown, no explanation, no backticks.
     antonyms: Array.isArray(parsed.antonyms) ? parsed.antonyms : [],
     etymology: parsed.etymology || '',
     partOfSpeech: parsed.partOfSpeech || 'unknown',
+    story: parsed.story || '',
   };
 }
 
@@ -127,7 +130,8 @@ Return a JSON array of objects, where each object has these exact fields:
   "synonyms": ["up to 4 synonyms"],
   "antonyms": ["up to 4 antonyms"],
   "etymology": "brief origin/history of the word (1-2 sentences)",
-  "partOfSpeech": "noun | verb | adjective | adverb | etc."
+  "partOfSpeech": "noun | verb | adjective | adverb | etc.",
+  "story": "a short, engaging real-life story or context vignette (max 50 words) illustrating the word's usage in a natural context"
 }
 
 Level classification guide:
@@ -165,6 +169,7 @@ Return ONLY the JSON array. No markdown, no explanation, no backticks.
       antonyms: Array.isArray(parsed.antonyms) ? parsed.antonyms : [],
       etymology: parsed.etymology || '',
       partOfSpeech: parsed.partOfSpeech || 'unknown',
+      story: parsed.story || '',
     };
   });
 }

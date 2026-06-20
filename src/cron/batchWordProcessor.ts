@@ -124,6 +124,8 @@ async function processPendingWords(): Promise<void> {
           antonyms: aiData.antonyms,
           etymology: aiData.etymology,
           partOfSpeech: aiData.partOfSpeech,
+          story: aiData.story,
+          isAiEnriched: true,
           addedVia: 'ai_batch',
         });
 

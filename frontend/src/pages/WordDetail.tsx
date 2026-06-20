@@ -218,6 +218,24 @@ const WordDetail: React.FC = () => {
     recognition.start();
   };
 
+  const renderHighlightedStory = (story: string, word: string) => {
+    if (!story) return null;
+    if (!word) return story;
+    const escapedWord = word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(`\\b(${escapedWord}(?:s|es|ed|ing)?)\\b`, 'gi');
+    const parts = story.split(regex);
+    return parts.map((part, i) => {
+      if (i % 2 === 1) {
+        return (
+          <span key={i} className="font-bold text-brand-accent underline decoration-dotted underline-offset-4">
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
       <Loader2 className="w-12 h-12 text-brand-accent animate-spin" />
@@ -349,6 +367,29 @@ const WordDetail: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Real-Life Context Story */}
+      {wordData.story && (
+        <div className="relative card overflow-hidden p-12 bg-gradient-to-br from-brand-accent/5 via-brand-bg to-brand-bg border border-brand-accent/20 space-y-6 shadow-xl shadow-brand-accent/5">
+          {/* Large decorative quotation mark */}
+          <span className="absolute font-serif text-brand-accent/10 text-9xl -left-2 -top-6 select-none pointer-events-none">
+            &ldquo;
+          </span>
+          <span className="absolute font-serif text-brand-accent/10 text-9xl -right-2 -bottom-20 select-none pointer-events-none">
+            &rdquo;
+          </span>
+          
+          <div className="relative z-10 space-y-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-accent/80 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse"></span>
+              Real-Life Context Story
+            </p>
+            <p className="text-xl md:text-2xl font-serif italic text-brand-primary leading-relaxed pl-6 border-l-4 border-brand-accent/30">
+              {renderHighlightedStory(wordData.story, wordData.word)}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Etymology */}
       {wordData.etymology && (

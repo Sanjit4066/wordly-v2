@@ -12,7 +12,10 @@ export interface IWord extends Document {
   etymology: string;
   partOfSpeech: string;
   createdAt: Date;
-  addedVia: 'manual' | 'ai_batch';
+  addedVia: 'manual' | 'ai_batch' | 'static';
+  isAiEnriched: boolean;
+  searchCount: number;
+  story: string;
 }
 
 const WordSchema = new Schema<IWord>(
@@ -67,8 +70,22 @@ const WordSchema = new Schema<IWord>(
     },
     addedVia: {
       type: String,
-      enum: ['manual', 'ai_batch'],
+      enum: ['manual', 'ai_batch', 'static'],
       default: 'ai_batch',
+    },
+    isAiEnriched: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    searchCount: {
+      type: Number,
+      default: 0,
+      index: true,
+    },
+    story: {
+      type: String,
+      default: '',
     },
   },
   {

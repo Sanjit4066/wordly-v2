@@ -28,6 +28,11 @@ router.get('/search', async (req: Request, res: Response) => {
     // Dictionary hit
     const word = await Word.findOne({ word: q });
     if (word) {
+      // Increment searchCount in the background for prioritization
+      Word.updateOne({ _id: word._id }, { $inc: { searchCount: 1 } }).catch(err =>
+        console.error(`Error incrementing searchCount for "${q}":`, err.message)
+      );
+
       return res.json({
         found: true,
         source: 'dictionary',
