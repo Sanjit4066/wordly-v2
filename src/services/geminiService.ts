@@ -72,7 +72,7 @@ You are a vocabulary expert. Analyze the English word "${word}" and return a JSO
   "antonyms": ["up to 4 antonyms"],
   "etymology": "brief origin/history of the word (1-2 sentences)",
   "partOfSpeech": "noun | verb | adjective | adverb | etc.",
-  "story": "a short, engaging real-life story or context vignette (max 50 words) illustrating the word's usage in a natural context"
+  "story": "a narrative micro-story (max 50 words) featuring a character, a brief action/conflict, and a resolution that naturally uses the word. Avoid general scene descriptions; tell a tiny, complete story."
 }
 
 Level classification guide:
@@ -131,7 +131,7 @@ Return a JSON array of objects, where each object has these exact fields:
   "antonyms": ["up to 4 antonyms"],
   "etymology": "brief origin/history of the word (1-2 sentences)",
   "partOfSpeech": "noun | verb | adjective | adverb | etc.",
-  "story": "a short, engaging real-life story or context vignette (max 50 words) illustrating the word's usage in a natural context"
+  "story": "a narrative micro-story (max 50 words) featuring a character, a brief action/conflict, and a resolution that naturally uses the word. Avoid general scene descriptions; tell a tiny, complete story."
 }
 
 Level classification guide:
