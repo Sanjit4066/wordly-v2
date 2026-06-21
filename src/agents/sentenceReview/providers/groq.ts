@@ -24,7 +24,7 @@ export async function reviewWithGroq(
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant",
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" }, // Ensures valid JSON response from Groq
         temperature: 0.2,
