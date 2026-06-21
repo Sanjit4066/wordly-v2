@@ -298,6 +298,18 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleUseSuggestion = async (sentenceId: string, suggestionText: string) => {
+    if (!todayWord) return;
+    try {
+      await editSentence(todayWord.word, sentenceId, suggestionText, '');
+      const sentencesRes = await getSentences(todayWord.word);
+      setSavedSentences(sentencesRes.sentences || []);
+      toast.success('Adopted AI suggestion!');
+    } catch {
+      toast.error('Failed to apply suggestion.');
+    }
+  };
+
   const handleShowNotifs = async () => {
     setShowNotifs(!showNotifs);
     if (!showNotifs) {
@@ -823,7 +835,7 @@ const Dashboard: React.FC = () => {
                                   Go with my sentence
                                 </button>
                                 <button
-                                  onClick={() => setSentence(s.flowSuggestion)}
+                                  onClick={() => handleUseSuggestion(s._id, s.flowSuggestion)}
                                   className="px-3 py-1.5 bg-brand-accent text-white text-[10px] font-bold uppercase tracking-wider rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
                                 >
                                   Use Suggestion

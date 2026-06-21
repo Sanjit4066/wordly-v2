@@ -117,6 +117,18 @@ const WordDetail: React.FC = () => {
     }
   };
 
+  const handleUseSuggestion = async (sentenceId: string, suggestionText: string) => {
+    if (!wordData) return;
+    try {
+      await editSentence(wordData.word, sentenceId, suggestionText, '');
+      const res = await getSentences(wordData.word);
+      setSentences(res.sentences || []);
+      toast.success('Adopted AI suggestion!');
+    } catch {
+      toast.error('Failed to apply suggestion.');
+    }
+  };
+
   const playAudio = () => {
     if (!term) return;
     const utterance = new SpeechSynthesisUtterance(term);
@@ -521,7 +533,7 @@ const WordDetail: React.FC = () => {
                           Go with my sentence
                         </button>
                         <button
-                          onClick={() => setNewSentence(s.flowSuggestion)}
+                          onClick={() => handleUseSuggestion(s._id, s.flowSuggestion)}
                           className="px-3 py-1.5 bg-brand-accent text-white text-[10px] font-bold uppercase tracking-wider rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
                         >
                           Use Suggestion
