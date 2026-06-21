@@ -207,16 +207,26 @@ Based on the Ebbinghaus Forgetting Curve:
 
 ---
 
-## AI Budget (20 calls/day)
+## AI Budget & Throughput Limits
 
-| Feature | AI Calls | Frequency |
-|---|---|---|
-| Word of Day | 0 | Pure DB query |
-| Word search (found) | 0 | Dictionary hit |
-| Batch word requests | 1 API call per 30 unique words | 11:55 PM |
-| Weekly quiz | 1-2 | Monday 11 PM |
-| **Typical weekday** | **0-5** | — |
-| **Worst case (Monday)** | **~17** | — |
+### Gemini AI Cloud Budget (20 calls/day limit)
+Gemini AI is strictly reserved for daily background/batch operations to preserve API quota:
+
+| Feature | AI Calls | Frequency | Target |
+|---|---|---|---|
+| Word of Day | 0 | Pure DB query | Gemini |
+| Word search (found) | 0 | Dictionary hit | Gemini |
+| Batch word requests | 1 API call per 30 unique words | 11:55 PM | Gemini |
+| Weekly quiz | 1-2 | Monday 11 PM | Gemini |
+| **Typical weekday** | **0-5** | — | Gemini |
+| **Worst case (Monday)** | **~17** | — | Gemini |
+
+### Sentence Practice Throughput (1800+ calls/hour)
+By leveraging a dedicated orchestrator fallback chain, the **Sentence Practice** feature is decoupled from Gemini's strict daily limits, making it highly available and virtually unlimited:
+
+* **Ollama (Local AI)**: Runs locally with **unlimited queries (100% free)**.
+* **Groq AI (Cloud API)**: High-speed cloud API with a rate limit of **30 requests/minute (1,800 requests/hour)** on the free tier.
+* **Result**: Sentence review capacity is boosted from a restrictive **20 times a day (V1)** to **1,800+ times an hour (V2)**, making the feature highly scalable and fully usable.
 
 ---
 
