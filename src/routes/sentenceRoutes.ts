@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import UserSentence from '../models/UserSentences';
 import Word from '../models/Dictionary';
+import { reviewSentence } from '../agents/sentenceReview';
 
 const router = Router();
 
@@ -64,8 +65,35 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'wordId and text are required' });
     }
 
+    // Run fallback sentence review
+    let reviewResult;
+    try {
+      reviewResult = await reviewSentence(wordId, text);
+    } catch (err: any) {
+      console.error(`❌ [SentenceReview Route Error]:`, err.message || err);
+      // Fallback: save sentence with default review fields
+      reviewResult = {
+        isCorrectUsage: true,
+        grammarIssues: [],
+        flowSuggestion: text,
+        feedback: 'AI review was temporarily unavailable.',
+        source: 'none',
+      };
+    }
+
     const now = new Date();
-    const newSentence = { text, createdAt: now, updatedAt: now, isDeleted: false, deletedAt: null };
+    const newSentence = {
+      text,
+      isCorrectUsage: reviewResult.isCorrectUsage,
+      grammarIssues: reviewResult.grammarIssues,
+      flowSuggestion: reviewResult.flowSuggestion,
+      feedback: reviewResult.feedback,
+      source: reviewResult.source,
+      createdAt: now,
+      updatedAt: now,
+      isDeleted: false,
+      deletedAt: null,
+    };
 
     const doc = await UserSentence.findOneAndUpdate(
       { userId, wordId },

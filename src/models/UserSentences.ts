@@ -2,6 +2,11 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 interface ISentenceEntry {
   text: string;
+  isCorrectUsage?: boolean;
+  grammarIssues?: string[];
+  flowSuggestion?: string;
+  feedback?: string;
+  source?: string;
   createdAt: Date;
   updatedAt: Date;
   isDeleted: boolean;
@@ -19,6 +24,11 @@ export interface IUserSentence extends Document {
 const SentenceEntrySchema = new Schema<ISentenceEntry>(
   {
     text: { type: String, required: true },
+    isCorrectUsage: { type: Boolean, default: true },
+    grammarIssues: { type: [String], default: [] },
+    flowSuggestion: { type: String, default: '' },
+    feedback: { type: String, default: '' },
+    source: { type: String, default: '' },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     isDeleted: { type: Boolean, default: false },

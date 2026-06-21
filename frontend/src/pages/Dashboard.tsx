@@ -4,7 +4,8 @@ import {
   Trophy, Flame, BookOpen, TrendingUp,
   Volume2, CheckCircle2, ArrowRight,
   Loader2, RotateCcw, Send, Bell, Settings,
-  Star, BookMarked, Award, CheckSquare, Sparkles, Book
+  Star, BookMarked, Award, CheckSquare, Sparkles, Book,
+  AlertCircle, Check
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { LEVEL_COLORS } from '../utils/colors';
@@ -727,7 +728,7 @@ const Dashboard: React.FC = () => {
                   </div>
 
                   {/* Saved sentences */}
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="technical-label">Your Sentences ({savedSentences.length})</p>
                       {savedSentences.length > 0 && (
@@ -742,8 +743,73 @@ const Dashboard: React.FC = () => {
                       </p>
                     ) : (
                       savedSentences.map((s: any) => (
-                        <div key={s._id} className="p-4 bg-brand-bg rounded-2xl border border-brand-border text-sm font-serif italic text-brand-primary">
-                          "{s.text}"
+                        <div key={s._id} className="p-6 bg-white dark:bg-brand-surface rounded-3xl border border-brand-border space-y-4 hover:shadow-lg transition-all duration-300">
+                          <div className="flex items-start justify-between gap-4">
+                            <p className="text-lg font-serif italic text-brand-primary">
+                              "{s.text}"
+                            </p>
+                            
+                            {/* Badges for correctness & source */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {s.source && s.source !== 'none' && (
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500">
+                                  🤖 {s.source === 'ollama' ? 'Local AI' : 'Gemini AI'}
+                                </span>
+                              )}
+                              {s.isCorrectUsage !== undefined && (
+                                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                                  s.isCorrectUsage 
+                                    ? 'bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400' 
+                                    : 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400'
+                                }`}>
+                                  {s.isCorrectUsage ? '✓ Correct' : '⚠ Review'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Grammar Issues */}
+                          {s.grammarIssues && s.grammarIssues.length > 0 && (
+                            <div className="space-y-1.5 p-4 bg-rose-50/50 dark:bg-rose-950/10 rounded-2xl border border-rose-100 dark:border-rose-900/30">
+                              <p className="text-[10px] font-bold text-rose-700 uppercase tracking-widest flex items-center gap-1">
+                                <AlertCircle className="w-3.5 h-3.5" />
+                                <span>Grammar Issues</span>
+                              </p>
+                              <ul className="list-disc list-inside text-xs text-rose-600 dark:text-rose-400 space-y-1 font-sans">
+                                {s.grammarIssues.map((issue: string, idx: number) => (
+                                  <li key={idx}>{issue}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* AI Feedback */}
+                          {s.feedback && (
+                            <p className="text-xs text-brand-muted font-sans leading-relaxed">
+                              <span className="font-bold text-brand-primary">Feedback:</span> {s.feedback}
+                            </p>
+                          )}
+
+                          {/* Flow Suggestion */}
+                          {s.flowSuggestion && s.flowSuggestion.trim().toLowerCase() !== s.text.trim().toLowerCase() && (
+                            <div className="flex items-center justify-between gap-4 p-4 bg-brand-accent/5 rounded-2xl border border-brand-accent/10">
+                              <div className="space-y-1">
+                                <p className="text-[10px] font-bold text-brand-accent uppercase tracking-widest flex items-center gap-1">
+                                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                                  <span>Better Flow Suggestion</span>
+                                </p>
+                                <p className="text-sm font-serif italic text-brand-primary">
+                                  "{s.flowSuggestion}"
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => setSentence(s.flowSuggestion)}
+                                className="px-3 py-1.5 bg-brand-accent text-white text-[10px] font-bold uppercase tracking-wider rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all flex-shrink-0"
+                              >
+                                Use Suggestion
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))
                     )}
