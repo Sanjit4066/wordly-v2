@@ -72,7 +72,7 @@ You are a vocabulary expert. Analyze the English word "${word}" and return a JSO
   "antonyms": ["up to 4 antonyms"],
   "etymology": "brief origin/history of the word (1-2 sentences)",
   "partOfSpeech": "noun | verb | adjective | adverb | etc.",
-  "story": "a narrative micro-story (around 200-250 words) featuring a character, a brief action/conflict, and a resolution that naturally uses the word. Avoid general scene descriptions; tell a tiny, complete story."
+  "story": "a narrative micro-story (around 200-250 words) featuring a character, a brief action/conflict, and a resolution that naturally uses the word (or any of its inflected/grammatical forms, such as ran/running for run, or plurals). Avoid general scene descriptions; tell a tiny, complete story."
 }
 
 Level classification guide:
@@ -131,7 +131,7 @@ Return a JSON array of objects, where each object has these exact fields:
   "antonyms": ["up to 4 antonyms"],
   "etymology": "brief origin/history of the word (1-2 sentences)",
   "partOfSpeech": "noun | verb | adjective | adverb | etc.",
-  "story": "a narrative micro-story (around 200-250 words) featuring a character, a brief action/conflict, and a resolution that naturally uses the word. Avoid general scene descriptions; tell a tiny, complete story."
+  "story": "a narrative micro-story (around 200-250 words) featuring a character, a brief action/conflict, and a resolution that naturally uses the word (or any of its inflected/grammatical forms, such as ran/running for run, or plurals). Avoid general scene descriptions; tell a tiny, complete story."
 }
 
 Level classification guide:
