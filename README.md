@@ -33,7 +33,8 @@ Our first version, **[Wordly: A Word Daily](https://github.com/Sanjit4066/Wordly
 | Feature | V1 | V2 |
 |---|---|---|
 | Database | Firebase Firestore | MongoDB (Mongoose) |
-| AI Usage | Every interaction | Batch processing only |
+| AI Usage | Every interaction (expensive) | Hybrid: Batch for dictionary, local/high-speed fallback chain for sentences |
+| Sentence Practice | ❌ | ✅ Instant AI grammar & flow review with fallback chain |
 | Revision | AI feedback | Self-assessment |
 | Word of Day | Global same word | Personalized per user level |
 | Dictionary | None | Growing word bank by difficulty |
@@ -80,9 +81,24 @@ Word.find({ level: 'advanced', word: { $nin: seenWords } })
 
 ## AI-Powered Sentence Practice
 
-To reinforce learning, users can write their own sentences for any word.
-* **Instant AI Feedback:** Get instant grammar checks, feedback, and better flow suggestions from AI.
-* **Flexible Suggestions:** Choose to adopt the AI-suggested alternative, or select **"Go with my sentence"** to dismiss the recommendation and keep your original writing as finalized.
+To reinforce learning, users can write their own sentences for any word. The app features an intelligent **Sentence Review Agent** that provides structured correction:
+
+### How it Works (Fallback Orchestration Chain)
+To keep costs zero/low and ensure maximum availability, sentence reviews run through a fallback chain:
+1. **Ollama (Local AI):** Tries to perform the review locally.
+2. **Groq AI (Cloud API):** Falls back to high-speed cloud LLMs if Ollama is unavailable.
+
+### Structured Review Output
+The review agent returns a structured JSON response:
+* **`isCorrectUsage`**: A boolean indicating if the vocabulary word was used correctly.
+* **`grammarIssues`**: A list of specific spelling, grammar, or punctuation errors.
+* **`flowSuggestion`**: An improved version of the sentence with better stylistic flow.
+* **`feedback`**: Friendly, actionable coaching feedback explaining the corrections.
+
+### User Options
+Once the AI review is displayed under a sentence:
+* **Use Suggestion**: Copies the AI-suggested sentence to the input box so you can save or edit a revised version.
+* **Go with my sentence**: Dismisses the AI recommendation block, keeping your original sentence as the final version.
 
 ---
 
