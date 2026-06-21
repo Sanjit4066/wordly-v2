@@ -78,6 +78,14 @@ Word.find({ level: 'advanced', word: { $nin: seenWords } })
 
 ---
 
+## AI-Powered Sentence Practice
+
+To reinforce learning, users can write their own sentences for any word.
+* **Instant AI Feedback:** Get instant grammar checks, feedback, and better flow suggestions from AI.
+* **Flexible Suggestions:** Choose to adopt the AI-suggested alternative, or select **"Go with my sentence"** to dismiss the recommendation and keep your original writing as finalized.
+
+---
+
 ## Setup
 
 ### 1. Clone and install
@@ -137,7 +145,7 @@ npm run dev
 |---|---|---|
 | GET | `/api/sentences/:wordId` | User's sentences for a word |
 | POST | `/api/sentences` | Save a new sentence |
-| PUT | `/api/sentences/:wordId/:id` | Edit a sentence |
+| PUT | `/api/sentences/:wordId/:id` | Edit a sentence or dismiss AI suggestion |
 | DELETE | `/api/sentences/:wordId/:id` | Soft delete a sentence |
 | GET | `/api/notifications` | Fetch notifications |
 | GET | `/api/notifications/count` | Unread badge count |
