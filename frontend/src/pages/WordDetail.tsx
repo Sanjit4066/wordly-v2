@@ -105,6 +105,18 @@ const WordDetail: React.FC = () => {
     }
   };
 
+  const handleKeepSentence = async (sentenceId: string, currentText: string) => {
+    if (!wordData) return;
+    try {
+      await editSentence(wordData.word, sentenceId, currentText, '');
+      const res = await getSentences(wordData.word);
+      setSentences(res.sentences || []);
+      toast.success('Kept your original sentence!');
+    } catch {
+      toast.error('Failed to dismiss suggestion.');
+    }
+  };
+
   const playAudio = () => {
     if (!term) return;
     const utterance = new SpeechSynthesisUtterance(term);
@@ -491,7 +503,7 @@ const WordDetail: React.FC = () => {
 
                   {/* Flow Suggestion */}
                   {s.flowSuggestion && s.flowSuggestion.trim().toLowerCase() !== s.text.trim().toLowerCase() && (
-                    <div className="flex items-center justify-between gap-4 p-4 bg-brand-accent/5 rounded-2xl border border-brand-accent/10">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-brand-accent/5 rounded-2xl border border-brand-accent/10">
                       <div className="space-y-1">
                         <p className="text-[10px] font-bold text-brand-accent uppercase tracking-widest flex items-center gap-1">
                           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
@@ -501,12 +513,20 @@ const WordDetail: React.FC = () => {
                           "{s.flowSuggestion}"
                         </p>
                       </div>
-                      <button
-                        onClick={() => setNewSentence(s.flowSuggestion)}
-                        className="px-3 py-1.5 bg-brand-accent text-white text-[10px] font-bold uppercase tracking-wider rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all flex-shrink-0"
-                      >
-                        Use Suggestion
-                      </button>
+                      <div className="flex gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
+                        <button
+                          onClick={() => handleKeepSentence(s._id, s.text)}
+                          className="px-3 py-1.5 bg-white dark:bg-brand-surface border border-brand-border text-brand-muted hover:text-brand-primary hover:border-brand-primary text-[10px] font-bold uppercase tracking-wider rounded-xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        >
+                          Go with my sentence
+                        </button>
+                        <button
+                          onClick={() => setNewSentence(s.flowSuggestion)}
+                          className="px-3 py-1.5 bg-brand-accent text-white text-[10px] font-bold uppercase tracking-wider rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        >
+                          Use Suggestion
+                        </button>
+                      </div>
                     </div>
                   )}
 

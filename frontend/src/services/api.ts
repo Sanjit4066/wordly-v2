@@ -87,11 +87,11 @@ export async function saveSentence(wordId: string, text: string) {
   return res.json();
 }
 
-export async function editSentence(wordId: string, sentenceId: string, text: string) {
+export async function editSentence(wordId: string, sentenceId: string, text?: string, flowSuggestion?: string) {
   const res = await fetch(`${BASE}/sentences/${wordId}/${sentenceId}`, {
     method: 'PUT',
     headers: headers(),
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text, flowSuggestion }),
   });
   return res.json();
 }

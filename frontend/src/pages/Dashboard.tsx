@@ -12,7 +12,8 @@ import { LEVEL_COLORS } from '../utils/colors';
 import {
   getDailyWord, getYesterdayWord, submitSelfMark, saveSentence,
   getSentences, getStreak, getMastery, getNotificationCount,
-  markNotificationsRead, getNotifications, markMastery, getWordsByMastery
+  markNotificationsRead, getNotifications, markMastery, getWordsByMastery,
+  editSentence
 } from '../services/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -282,6 +283,18 @@ const Dashboard: React.FC = () => {
       toast.error('Failed to save sentence.');
     } finally {
       setSavingSentence(false);
+    }
+  };
+
+  const handleKeepSentence = async (sentenceId: string, currentText: string) => {
+    if (!todayWord) return;
+    try {
+      await editSentence(todayWord.word, sentenceId, currentText, '');
+      const sentencesRes = await getSentences(todayWord.word);
+      setSavedSentences(sentencesRes.sentences || []);
+      toast.success('Kept your original sentence!');
+    } catch {
+      toast.error('Failed to dismiss suggestion.');
     }
   };
 
@@ -792,7 +805,7 @@ const Dashboard: React.FC = () => {
 
                           {/* Flow Suggestion */}
                           {s.flowSuggestion && s.flowSuggestion.trim().toLowerCase() !== s.text.trim().toLowerCase() && (
-                            <div className="flex items-center justify-between gap-4 p-4 bg-brand-accent/5 rounded-2xl border border-brand-accent/10">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-brand-accent/5 rounded-2xl border border-brand-accent/10">
                               <div className="space-y-1">
                                 <p className="text-[10px] font-bold text-brand-accent uppercase tracking-widest flex items-center gap-1">
                                   <Sparkles className="w-3.5 h-3.5 animate-pulse" />
@@ -802,12 +815,20 @@ const Dashboard: React.FC = () => {
                                   "{s.flowSuggestion}"
                                 </p>
                               </div>
-                              <button
-                                onClick={() => setSentence(s.flowSuggestion)}
-                                className="px-3 py-1.5 bg-brand-accent text-white text-[10px] font-bold uppercase tracking-wider rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all flex-shrink-0"
-                              >
-                                Use Suggestion
-                              </button>
+                              <div className="flex gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
+                                <button
+                                  onClick={() => handleKeepSentence(s._id, s.text)}
+                                  className="px-3 py-1.5 bg-white dark:bg-brand-surface border border-brand-border text-brand-muted hover:text-brand-primary hover:border-brand-primary text-[10px] font-bold uppercase tracking-wider rounded-xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                >
+                                  Go with my sentence
+                                </button>
+                                <button
+                                  onClick={() => setSentence(s.flowSuggestion)}
+                                  className="px-3 py-1.5 bg-brand-accent text-white text-[10px] font-bold uppercase tracking-wider rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                >
+                                  Use Suggestion
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>

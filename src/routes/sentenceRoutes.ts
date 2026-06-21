@@ -113,17 +113,24 @@ router.put('/:wordId/:sentenceId', async (req: Request, res: Response) => {
     const userId = req.headers['x-user-id'] as string;
     if (!userId) return res.status(401).json({ error: 'User ID required' });
 
-    const { text } = req.body;
-    if (!text) return res.status(400).json({ error: 'text is required' });
+    const { text, flowSuggestion } = req.body;
+    if (text === undefined && flowSuggestion === undefined) {
+      return res.status(400).json({ error: 'text or flowSuggestion is required' });
+    }
+
+    const updateFields: any = {
+      'sentences.$.updatedAt': new Date()
+    };
+    if (text !== undefined) {
+      updateFields['sentences.$.text'] = text;
+    }
+    if (flowSuggestion !== undefined) {
+      updateFields['sentences.$.flowSuggestion'] = flowSuggestion;
+    }
 
     await UserSentence.findOneAndUpdate(
       { userId, wordId: req.params.wordId, 'sentences._id': req.params.sentenceId },
-      {
-        $set: {
-          'sentences.$.text': text,
-          'sentences.$.updatedAt': new Date(),
-        },
-      }
+      { $set: updateFields }
     );
 
     res.json({ success: true });
