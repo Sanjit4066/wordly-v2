@@ -766,7 +766,7 @@ const Dashboard: React.FC = () => {
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {s.source && s.source !== 'none' && (
                                 <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500">
-                                  🤖 {s.source === 'ollama' ? 'Local AI' : 'Gemini AI'}
+                                  🤖 {s.source === 'ollama' ? 'Local AI' : s.source === 'groq' ? 'Groq AI' : 'Gemini AI'}
                                 </span>
                               )}
                               {s.isCorrectUsage !== undefined && (
