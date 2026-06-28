@@ -31,7 +31,6 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   signIn: () => Promise<void>;
-  devSignIn: () => void;
   logout: () => Promise<void>;
   updateDifficulty: (level: DifficultyLevel) => void;
   refreshProfile: () => Promise<void>;
@@ -89,18 +88,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const isDev = localStorage.getItem('wordly_dev_mode') === 'true';
-    if (isDev) {
-      setUser({
-        uid: 'dev-user-id',
-        displayName: 'Dev Reviewer',
-        photoURL: '',
-      } as any);
-      fetchAndSetProfile('dev-user-id', 'Dev Reviewer', '');
-      setLoading(false);
-      return;
-    }
-
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
@@ -130,19 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const devSignIn = () => {
-    localStorage.setItem('wordly_dev_mode', 'true');
-    localStorage.setItem('wordly_user_id', 'dev-user-id');
-    setUser({
-      uid: 'dev-user-id',
-      displayName: 'Dev Reviewer',
-      photoURL: '',
-    } as any);
-    fetchAndSetProfile('dev-user-id', 'Dev Reviewer', '');
-  };
-
   const logout = async () => {
-    localStorage.removeItem('wordly_dev_mode');
     localStorage.removeItem('wordly_user_id');
     setUser(null);
     setProfile(null);
@@ -159,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, devSignIn, logout, updateDifficulty, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, signIn, logout, updateDifficulty, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
