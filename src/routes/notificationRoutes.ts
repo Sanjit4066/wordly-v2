@@ -3,11 +3,18 @@ import Notification from '../models/Notifications';
 
 const router = Router();
 
-// GET /api/notifications — latest 20 unread notifications
+// GET /api/notifications — latest 20 notifications
 router.get('/', async (req: Request, res: Response) => {
   try {
     const userId = req.headers['x-user-id'] as string;
     if (!userId) return res.status(401).json({ error: 'User ID required' });
+
+    // Clean up duplicate review_due notifications (keep only the newest)
+    const reviewReminders = await Notification.find({ userId, type: 'review_due' }).sort({ createdAt: -1 });
+    if (reviewReminders.length > 1) {
+      const idsToDelete = reviewReminders.slice(1).map(n => n._id);
+      await Notification.deleteMany({ _id: { $in: idsToDelete } });
+    }
 
     const notifications = await Notification.find({ userId })
       .sort({ createdAt: -1 })
@@ -66,6 +73,7 @@ router.post('/welcome', async (req: Request, res: Response) => {
       userId,
       type: 'welcome',
       message: `Welcome to Wordly V2, ${nameToUse}! 🎉 We're thrilled to have you here. Start exploring words!`,
+      expiresAt: new Date('2126-01-01'), // Long-lived (100 years) welcome notification
     });
 
     res.json({ success: true });

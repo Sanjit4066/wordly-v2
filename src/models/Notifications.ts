@@ -27,7 +27,7 @@ const NotificationSchema = new Schema<INotification>(
       type: Date,
       default: () => {
         const d = new Date();
-        d.setDate(d.getDate() + 30);
+        d.setHours(d.getHours() + 24); // Default to expire in 24 hours
         return d;
       },
     },

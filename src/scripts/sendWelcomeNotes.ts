@@ -34,6 +34,7 @@ async function backfillWelcomeNotifications() {
           userId,
           type: 'welcome',
           message: `Welcome to Wordly V2! 🎉 We're thrilled to have you here. Start exploring words!`,
+          expiresAt: new Date('2126-01-01'), // Long-lived (100 years) welcome notification
         });
         addedCount++;
         console.log(`Added welcome notification for user: ${userId}`);

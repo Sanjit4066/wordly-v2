@@ -40,6 +40,12 @@ async function sendReviewReminders(): Promise<void> {
   });
 
   if (notifications.length > 0) {
+    // Delete any existing review_due notifications for these users to prevent duplication/clutter
+    await Notification.deleteMany({
+      userId: { $in: userIds },
+      type: 'review_due',
+    });
+
     await Notification.insertMany(notifications);
     console.log(`✅ [SR Reminder] Sent ${notifications.length} review reminder(s)`);
   } else {
